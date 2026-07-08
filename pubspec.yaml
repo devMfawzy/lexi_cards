@@ -1,5 +1,5 @@
 name: lexi_cards
-description: "AI-powered flashcard app for learning vocabulary in context."
+description: "A spaced-repetition flashcard app (Anki-style, SM-2 algorithm)."
 publish_to: 'none'
 
 # The following defines the version and build number for your application.
@@ -36,9 +36,6 @@ dependencies:
 
   # Local storage
   hive_flutter: ^1.1.0
-
-  # Networking
-  dio: ^5.7.0
 
   # Dependency injection
   get_it: ^8.0.0
