@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'core/di/injection_container.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';

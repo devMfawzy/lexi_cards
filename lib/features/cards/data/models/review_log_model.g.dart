@@ -8,7 +8,7 @@ part of 'review_log_model.dart';
 
 class ReviewLogModelAdapter extends TypeAdapter<ReviewLogModel> {
   @override
-  final int typeId = 2;
+  final typeId = 2;
 
   @override
   ReviewLogModel read(BinaryReader reader) {
@@ -20,11 +20,11 @@ class ReviewLogModelAdapter extends TypeAdapter<ReviewLogModel> {
       ..id = fields[0] as String
       ..cardId = fields[1] as String
       ..reviewedAt = fields[2] as DateTime
-      ..rating = fields[3] as int
-      ..previousIntervalDays = fields[4] as int
-      ..newIntervalDays = fields[5] as int
-      ..previousEaseFactor = fields[6] as double
-      ..newEaseFactor = fields[7] as double;
+      ..rating = (fields[3] as num).toInt()
+      ..previousIntervalDays = (fields[4] as num).toInt()
+      ..newIntervalDays = (fields[5] as num).toInt()
+      ..previousEaseFactor = (fields[6] as num).toDouble()
+      ..newEaseFactor = (fields[7] as num).toDouble();
   }
 
   @override

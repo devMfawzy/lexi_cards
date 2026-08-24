@@ -8,7 +8,7 @@ part of 'flashcard_model.dart';
 
 class FlashcardModelAdapter extends TypeAdapter<FlashcardModel> {
   @override
-  final int typeId = 1;
+  final typeId = 1;
 
   @override
   FlashcardModel read(BinaryReader reader) {
@@ -22,13 +22,13 @@ class FlashcardModelAdapter extends TypeAdapter<FlashcardModel> {
       ..front = fields[2] as String
       ..back = fields[3] as String
       ..createdAt = fields[4] as DateTime
-      ..state = fields[5] as int
+      ..state = (fields[5] as num).toInt()
       ..dueDate = fields[6] as DateTime
-      ..intervalDays = fields[7] as int
-      ..easeFactor = fields[8] as double
-      ..learningStepIndex = fields[9] as int
-      ..lapses = fields[10] as int
-      ..reviewCount = fields[11] as int;
+      ..intervalDays = (fields[7] as num).toInt()
+      ..easeFactor = (fields[8] as num).toDouble()
+      ..learningStepIndex = (fields[9] as num).toInt()
+      ..lapses = (fields[10] as num).toInt()
+      ..reviewCount = (fields[11] as num).toInt();
   }
 
   @override

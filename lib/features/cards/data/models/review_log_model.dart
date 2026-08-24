@@ -1,4 +1,4 @@
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import '../../../review/domain/entities/rating.dart';
 import '../../domain/entities/review_log.dart';
 

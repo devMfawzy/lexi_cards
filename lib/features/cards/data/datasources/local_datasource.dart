@@ -1,4 +1,4 @@
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import '../models/deck_model.dart';
 import '../models/flashcard_model.dart';
 import '../models/review_log_model.dart';
