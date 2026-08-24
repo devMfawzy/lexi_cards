@@ -35,6 +35,7 @@ dependencies:
   equatable: ^2.0.7
 
   # Local storage
+  hive_ce: ^2.19.3
   hive_ce_flutter: ^2.3.4
 
   # Dependency injection

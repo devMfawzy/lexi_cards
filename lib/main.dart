@@ -3,17 +3,13 @@ import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'core/di/injection_container.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
-import 'features/cards/data/models/deck_model.dart';
-import 'features/cards/data/models/flashcard_model.dart';
-import 'features/cards/data/models/review_log_model.dart';
+import 'hive_registrar.g.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Hive.initFlutter();
-  Hive.registerAdapter(DeckModelAdapter());
-  Hive.registerAdapter(FlashcardModelAdapter());
-  Hive.registerAdapter(ReviewLogModelAdapter());
+  Hive.registerAdapters();
 
   await initDependencies();
 
