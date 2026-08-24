@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/widgets/empty_state.dart';
 import '../bloc/decks_cubit.dart';
 import '../bloc/decks_state.dart';
 import '../widgets/create_deck_dialog.dart';
@@ -44,11 +45,15 @@ class _DecksView extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (state.summaries.isEmpty) {
-            return const Center(child: Text('No decks yet. Tap + to create one.'));
+            return const EmptyState(
+              icon: Icons.style_outlined,
+              message: 'No decks yet. Tap + to create one.',
+            );
           }
           return RefreshIndicator(
             onRefresh: () => context.read<DecksCubit>().loadDecks(),
             child: ListView.builder(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
               itemCount: state.summaries.length,
               itemBuilder: (context, index) {
                 final summary = state.summaries[index];

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection_container.dart';
 import '../bloc/review_cubit.dart';
 import '../bloc/review_state.dart';
+import '../widgets/flashcard_flip.dart';
 import '../widgets/rating_buttons.dart';
 
 class ReviewPage extends StatelessWidget {
@@ -56,46 +57,70 @@ class _ReviewView extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (state.isComplete) {
+            final colorScheme = Theme.of(context).colorScheme;
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.check_circle_outline, size: 64),
-                  const SizedBox(height: 16),
-                  Text('No more cards due. Reviewed ${state.reviewedCount}.'),
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primaryContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.check, size: 48, color: colorScheme.onPrimaryContainer),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'All caught up!',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Reviewed ${state.reviewedCount} card${state.reviewedCount == 1 ? '' : 's'}.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                  ),
                 ],
               ),
             );
           }
 
           final card = state.currentCard!;
+          final total = state.reviewedCount + state.queue.length;
+          final progress = total == 0 ? 0.0 : state.reviewedCount / total;
+
           return Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(value: progress, minHeight: 6),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${state.reviewedCount} / $total',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
                 Expanded(
                   child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          card.front,
-                          style: Theme.of(context).textTheme.headlineSmall,
-                          textAlign: TextAlign.center,
-                        ),
-                        if (state.showAnswer) ...[
-                          const Divider(height: 48),
-                          Text(
-                            card.back,
-                            style: Theme.of(context).textTheme.headlineSmall,
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ],
+                    child: FlashcardFlip(
+                      key: ValueKey(card.id),
+                      front: card.front,
+                      back: card.back,
+                      showAnswer: state.showAnswer,
+                      onTap: state.showAnswer
+                          ? null
+                          : () => context.read<ReviewCubit>().revealAnswer(),
                     ),
                   ),
                 ),
+                const SizedBox(height: 16),
                 if (!state.showAnswer)
                   ElevatedButton(
                     onPressed: () => context.read<ReviewCubit>().revealAnswer(),

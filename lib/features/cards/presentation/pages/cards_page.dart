@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/widgets/empty_state.dart';
 import '../bloc/cards_cubit.dart';
 import '../bloc/cards_state.dart';
 import '../widgets/add_card_dialog.dart';
@@ -57,9 +58,13 @@ class _CardsView extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (state.cards.isEmpty) {
-            return const Center(child: Text('No cards yet. Add one below.'));
+            return const EmptyState(
+              icon: Icons.note_add_outlined,
+              message: 'No cards yet. Add one below.',
+            );
           }
           return ListView.builder(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
             itemCount: state.cards.length,
             itemBuilder: (context, index) {
               final card = state.cards[index];
