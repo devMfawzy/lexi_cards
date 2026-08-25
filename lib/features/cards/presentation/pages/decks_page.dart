@@ -31,7 +31,16 @@ class _DecksView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('My Decks')),
+      appBar: AppBar(
+        title: const Text('My Decks'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.insights_outlined),
+            tooltip: 'Stats',
+            onPressed: () => context.push('/stats'),
+          ),
+        ],
+      ),
       body: BlocConsumer<DecksCubit, DecksState>(
         listener: (context, state) {
           if (state.errorMessage != null) {

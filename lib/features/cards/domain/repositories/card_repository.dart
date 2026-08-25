@@ -14,9 +14,11 @@ abstract class CardRepository {
   Future<Flashcard> addCard(String deckId, String front, String back);
   Future<void> deleteCard(String id);
   Future<void> updateCard(Flashcard card);
+  Future<List<Flashcard>> getAllCards();
 
   // Review support
   Future<List<Flashcard>> getDueCards(String deckId);
   Future<void> addReviewLog(ReviewLog log);
   Future<List<ReviewLog>> getReviewLogs(String cardId);
+  Future<List<ReviewLog>> getAllReviewLogs();
 }

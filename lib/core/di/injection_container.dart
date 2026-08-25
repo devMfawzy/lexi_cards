@@ -11,6 +11,7 @@ import '../../features/cards/domain/usecases/get_cards.dart';
 import '../../features/cards/domain/usecases/get_decks.dart';
 import '../../features/review/domain/usecases/get_due_cards.dart';
 import '../../features/review/domain/usecases/submit_review.dart';
+import '../../features/stats/domain/usecases/get_review_stats.dart';
 
 final getIt = GetIt.instance;
 
@@ -32,4 +33,7 @@ Future<void> initDependencies() async {
   // Review feature - usecases
   getIt.registerFactory(() => GetDueCards(getIt()));
   getIt.registerFactory(() => SubmitReview(getIt()));
+
+  // Stats feature - usecases
+  getIt.registerFactory(() => GetReviewStats(getIt()));
 }

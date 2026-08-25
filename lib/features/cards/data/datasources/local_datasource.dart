@@ -12,9 +12,11 @@ abstract class LocalDataSource {
   Future<FlashcardModel?> getCard(String id);
   Future<FlashcardModel> saveCard(FlashcardModel model);
   Future<void> deleteCard(String id);
+  Future<List<FlashcardModel>> getAllCards();
 
   Future<void> saveReviewLog(ReviewLogModel model);
   Future<List<ReviewLogModel>> getReviewLogs(String cardId);
+  Future<List<ReviewLogModel>> getAllReviewLogs();
 }
 
 class LocalDataSourceImpl implements LocalDataSource {
@@ -76,6 +78,12 @@ class LocalDataSourceImpl implements LocalDataSource {
   }
 
   @override
+  Future<List<FlashcardModel>> getAllCards() async {
+    final box = await _cards;
+    return box.values.toList();
+  }
+
+  @override
   Future<void> saveReviewLog(ReviewLogModel model) async {
     final box = await _reviewLogs;
     await box.put(model.id, model);
@@ -85,5 +93,11 @@ class LocalDataSourceImpl implements LocalDataSource {
   Future<List<ReviewLogModel>> getReviewLogs(String cardId) async {
     final box = await _reviewLogs;
     return box.values.where((l) => l.cardId == cardId).toList();
+  }
+
+  @override
+  Future<List<ReviewLogModel>> getAllReviewLogs() async {
+    final box = await _reviewLogs;
+    return box.values.toList();
   }
 }

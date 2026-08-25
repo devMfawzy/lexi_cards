@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/cards/presentation/pages/cards_page.dart';
 import '../../features/cards/presentation/pages/decks_page.dart';
 import '../../features/review/presentation/pages/review_page.dart';
+import '../../features/stats/presentation/pages/stats_page.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -22,6 +23,11 @@ final appRouter = GoRouter(
       name: 'review',
       builder: (context, state) =>
           ReviewPage(deckId: state.pathParameters['deckId']!),
+    ),
+    GoRoute(
+      path: '/stats',
+      name: 'stats',
+      builder: (context, state) => const StatsPage(),
     ),
   ],
 );

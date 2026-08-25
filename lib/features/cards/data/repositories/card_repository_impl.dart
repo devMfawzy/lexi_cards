@@ -72,6 +72,12 @@ class CardRepositoryImpl implements CardRepository {
   }
 
   @override
+  Future<List<Flashcard>> getAllCards() async {
+    final models = await localDataSource.getAllCards();
+    return models.map((m) => m.toEntity()).toList();
+  }
+
+  @override
   Future<List<Flashcard>> getDueCards(String deckId) async {
     final now = DateTime.now();
     final endOfToday = DateTime(now.year, now.month, now.day + 1);
@@ -103,6 +109,12 @@ class CardRepositoryImpl implements CardRepository {
   @override
   Future<List<ReviewLog>> getReviewLogs(String cardId) async {
     final models = await localDataSource.getReviewLogs(cardId);
+    return models.map((m) => m.toEntity()).toList();
+  }
+
+  @override
+  Future<List<ReviewLog>> getAllReviewLogs() async {
+    final models = await localDataSource.getAllReviewLogs();
     return models.map((m) => m.toEntity()).toList();
   }
 }
