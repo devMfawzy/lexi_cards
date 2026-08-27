@@ -3,9 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/widgets/empty_state.dart';
+import '../../domain/entities/flashcard.dart';
 import '../bloc/cards_cubit.dart';
 import '../bloc/cards_state.dart';
-import '../widgets/add_card_dialog.dart';
+import '../widgets/card_editor_dialog.dart';
 import '../widgets/card_list_tile.dart';
 
 class CardsPage extends StatelessWidget {
@@ -21,6 +22,7 @@ class CardsPage extends StatelessWidget {
         getCards: getIt(),
         addCardUseCase: getIt(),
         deleteCardUseCase: getIt(),
+        updateCardUseCase: getIt(),
       )..loadCards(),
       child: _CardsView(deckId: deckId),
     );
@@ -71,6 +73,7 @@ class _CardsView extends StatelessWidget {
               return CardListTile(
                 card: card,
                 onDelete: () => context.read<CardsCubit>().deleteCard(card.id),
+                onTap: () => _editCard(context, card),
               );
             },
           );
@@ -81,7 +84,7 @@ class _CardsView extends StatelessWidget {
           final cubit = context.read<CardsCubit>();
           final result = await showDialog<(String, String)>(
             context: context,
-            builder: (_) => const AddCardDialog(),
+            builder: (_) => const CardEditorDialog(),
           );
           if (result != null) {
             cubit.addCard(result.$1, result.$2);
@@ -90,5 +93,19 @@ class _CardsView extends StatelessWidget {
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  Future<void> _editCard(BuildContext context, Flashcard card) async {
+    final cubit = context.read<CardsCubit>();
+    final result = await showDialog<(String, String)>(
+      context: context,
+      builder: (_) => CardEditorDialog(
+        initialFront: card.front,
+        initialBack: card.back,
+      ),
+    );
+    if (result != null) {
+      cubit.updateCard(card, result.$1, result.$2);
+    }
   }
 }

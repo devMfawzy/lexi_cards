@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/rich_text_viewer.dart';
+
 /// A flashcard that flips on a Y-axis to reveal its answer.
 ///
 /// Keying an instance by the card's id (at the call site) makes Flutter
@@ -95,13 +97,12 @@ class _CardFace extends StatelessWidget {
       ),
       alignment: Alignment.center,
       child: SingleChildScrollView(
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+        child: DefaultTextStyle.merge(
+          style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                 fontWeight: FontWeight.w600,
                 color: isFront ? colorScheme.onSurface : colorScheme.onPrimaryContainer,
               ),
+          child: RichTextViewer(stored: text),
         ),
       ),
     );

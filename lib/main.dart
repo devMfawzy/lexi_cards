@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'core/di/injection_container.dart';
 import 'core/router/app_router.dart';
@@ -26,6 +27,8 @@ class LexiCardsApp extends StatelessWidget {
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: ThemeMode.system,
+      localizationsDelegates: FlutterQuillLocalizations.localizationsDelegates,
+      supportedLocales: FlutterQuillLocalizations.supportedLocales,
       routerConfig: appRouter,
     );
   }

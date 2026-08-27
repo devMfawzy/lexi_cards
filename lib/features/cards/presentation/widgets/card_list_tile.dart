@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import '../../../../core/rich_text/quill_content.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/flashcard.dart';
 
 class CardListTile extends StatelessWidget {
   final Flashcard card;
   final VoidCallback onDelete;
+  final VoidCallback onTap;
 
   const CardListTile({
     super.key,
     required this.card,
     required this.onDelete,
+    required this.onTap,
   });
 
   String _stateLabel(CardState state) {
@@ -82,44 +85,48 @@ class CardListTile extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.only(bottom: 12),
         child: Card(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
-            child: Row(
-              children: [
-                Container(width: 4, height: 40, decoration: BoxDecoration(
-                  color: stateColor,
-                  borderRadius: BorderRadius.circular(2),
-                )),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        card.front,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        card.back,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+          child: InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
+              child: Row(
+                children: [
+                  Container(width: 4, height: 40, decoration: BoxDecoration(
+                    color: stateColor,
+                    borderRadius: BorderRadius.circular(2),
+                  )),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          plainTextPreview(card.front),
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          plainTextPreview(card.back),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Chip(
-                  label: Text(_stateLabel(card.state)),
-                  labelStyle: TextStyle(color: stateColor, fontSize: 12, fontWeight: FontWeight.w600),
-                  backgroundColor: stateColor.withValues(alpha: 0.12),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  Chip(
+                    label: Text(_stateLabel(card.state)),
+                    labelStyle: TextStyle(color: stateColor, fontSize: 12, fontWeight: FontWeight.w600),
+                    backgroundColor: stateColor.withValues(alpha: 0.12),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
