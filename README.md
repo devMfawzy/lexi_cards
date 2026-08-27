@@ -7,7 +7,7 @@ I built this as a portfolio piece to show a complete, non-trivial Flutter app: c
 ## What's in it
 
 - **Decks & cards** — create decks, add/edit/delete cards. Front and back support rich text (bold, italic, underline, color) via a curated Quill toolbar, Anki-style.
-- **Review sessions** — due cards are pulled per deck (overdue learning/relearning cards first, then cards due today, then new cards), shown one at a time with a flip animation, and rated on a 4-button scale.
+- **Review sessions** — due cards are pulled per deck (overdue learning/relearning cards first, then cards due today, then new cards), shown one at a time with a flip animation, and rated on a 4-button scale. A card that lands back in learning/relearning (short SM-2 steps, minutes away) stays in the same session — it's held in a pending list and spliced back into the queue once it's due, instead of only reappearing on the next reload.
 - **SM-2 scheduling** — new cards go through short learning steps (1m → 10m) before graduating into day-scale review intervals. Ease factor adjusts per rating, lapses send a card back to relearning. Config lives in one place (`sm2_config.dart`) so the constants aren't scattered through the scheduler.
 - **Stats screen** — every review was already being logged (`ReviewLog`: rating, interval before/after, ease before/after) but nothing surfaced it. Added a screen for current/longest streak, retention rate, and 7-day bar charts for reviews done vs. cards coming due.
 
@@ -59,10 +59,11 @@ The parts with actual logic worth testing, and all are covered:
 - `sm2_scheduler_test.dart` — every state transition (new → learning → review, lapses into relearning, ease-factor floor, interval compounding) against a fixed `now`.
 - `get_review_stats_test.dart` — streak edge cases (gap breaks it, "reviewed yesterday but not yet today" still counts as active, same-day reviews don't double-count) and retention math.
 - `quill_content_test.dart` — Delta JSON round-tripping, the legacy-plain-text fallback (including malformed/non-Delta JSON, which must not throw), and collapsing multi-line content into a single-line preview.
+- `review_cubit_test.dart` — the pending-requeue mechanics (a card is held back, promoted once due, left alone if still not due, and a graduated card is never held back at all) against an injectable `now`, using `bloc_test`.
 
 ## What's not here yet
 
-Single review queue per deck, no inline images in cards, no reminders/notifications, no sync — it's local-only. These are the obvious next steps if this grows past a portfolio piece.
+No inline images in cards, no reminders/notifications, no sync — it's local-only. These are the obvious next steps if this grows past a portfolio piece.
 
 ## Author
 

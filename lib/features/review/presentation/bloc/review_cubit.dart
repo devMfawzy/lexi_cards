@@ -22,7 +22,12 @@ class ReviewCubit extends Cubit<ReviewState> {
     emit(state.copyWith(isLoading: true, errorMessage: null));
     try {
       final cards = await getDueCards(deckId);
-      emit(state.copyWith(queue: cards, isLoading: false, showAnswer: false));
+      emit(state.copyWith(
+        queue: cards,
+        pendingRequeue: const [],
+        isLoading: false,
+        showAnswer: false,
+      ));
       _computePreviews();
     } catch (e) {
       emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
@@ -33,14 +38,31 @@ class ReviewCubit extends Cubit<ReviewState> {
     emit(state.copyWith(showAnswer: true));
   }
 
-  Future<void> submitRating(Rating rating) async {
+  /// Rates the current card and advances the queue. A card that lands back
+  /// in learning/relearning (short SM-2 steps) is held in [ReviewState.pendingRequeue]
+  /// rather than dropped — any pending card whose due date has arrived by
+  /// [now] is spliced onto the end of the queue, so it can resurface later
+  /// in this same session instead of only on the next full reload.
+  Future<void> submitRating(Rating rating, {DateTime? now}) async {
     final card = state.currentCard;
     if (card == null) return;
     try {
-      await submitReviewUseCase(card.id, rating);
+      final updated = await submitReviewUseCase(card.id, rating);
+      final effectiveNow = now ?? DateTime.now();
+
       final remaining = state.queue.skip(1).toList();
+      final pending = [
+        ...state.pendingRequeue,
+        if (updated.state == CardState.learning || updated.state == CardState.relearning)
+          updated,
+      ];
+      final due = pending.where((c) => !c.dueDate.isAfter(effectiveNow)).toList()
+        ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
+      final stillPending = pending.where((c) => c.dueDate.isAfter(effectiveNow)).toList();
+
       emit(state.copyWith(
-        queue: remaining,
+        queue: [...remaining, ...due],
+        pendingRequeue: stillPending,
         showAnswer: false,
         reviewedCount: state.reviewedCount + 1,
       ));
@@ -65,7 +87,11 @@ class ReviewCubit extends Cubit<ReviewState> {
     final newCards = cards.where((c) => c.state == CardState.newCard).toList()
       ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
-    emit(state.copyWith(queue: [...due, ...newCards], showAnswer: false));
+    emit(state.copyWith(
+      queue: [...due, ...newCards],
+      pendingRequeue: const [],
+      showAnswer: false,
+    ));
     _computePreviews();
   }
 
