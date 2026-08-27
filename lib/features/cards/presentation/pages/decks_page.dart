@@ -39,6 +39,11 @@ class _DecksView extends StatelessWidget {
             tooltip: 'Stats',
             onPressed: () => context.push('/stats'),
           ),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: 'Settings',
+            onPressed: () => context.push('/settings'),
+          ),
         ],
       ),
       body: BlocConsumer<DecksCubit, DecksState>(

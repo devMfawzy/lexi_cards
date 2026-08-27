@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/cards/presentation/pages/cards_page.dart';
 import '../../features/cards/presentation/pages/decks_page.dart';
 import '../../features/review/presentation/pages/review_page.dart';
+import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/stats/presentation/pages/stats_page.dart';
 
 final appRouter = GoRouter(
@@ -28,6 +29,11 @@ final appRouter = GoRouter(
       path: '/stats',
       name: 'stats',
       builder: (context, state) => const StatsPage(),
+    ),
+    GoRoute(
+      path: '/settings',
+      name: 'settings',
+      builder: (context, state) => const SettingsPage(),
     ),
   ],
 );
