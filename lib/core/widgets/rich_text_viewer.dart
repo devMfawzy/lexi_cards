@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 
 import '../rich_text/quill_content.dart';
+import 'quill_image_provider_cache.dart';
 
 /// Read-only rendering of a card's stored (Delta JSON or legacy plain-text)
 /// content. Wrapped in [IgnorePointer] since it's display-only — that also
@@ -45,10 +47,16 @@ class _RichTextViewerState extends State<RichTextViewer> {
     return IgnorePointer(
       child: QuillEditor.basic(
         controller: _controller,
-        config: const QuillEditorConfig(
+        config: QuillEditorConfig(
           scrollable: false,
           expands: false,
           padding: EdgeInsets.zero,
+          embedBuilders: FlutterQuillEmbeds.editorBuilders(
+            videoEmbedConfig: null,
+            imageEmbedConfig: QuillEditorImageEmbedConfig(
+              imageProviderBuilder: cachedQuillImageProvider,
+            ),
+          ),
         ),
       ),
     );

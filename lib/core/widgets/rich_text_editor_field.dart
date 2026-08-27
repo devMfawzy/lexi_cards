@@ -1,5 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
+
+import '../rich_text/quill_content.dart';
+import 'quill_image_provider_cache.dart';
+
+/// Converts a picked image (local path or pasted link) into what actually
+/// gets embedded, then inserts it at the current selection — the same
+/// mechanics as the (deprecated) `insertImageBlock` extension, written out
+/// directly to avoid depending on a deprecated API.
+Future<void> _insertPickedImage(String imageUrl, QuillController controller) async {
+  final source = await imageEmbedSourceFor(imageUrl);
+  final index = controller.selection.baseOffset;
+  final length = controller.selection.extentOffset - index;
+  controller
+    ..skipRequestKeyboard = true
+    ..replaceText(index, length, BlockEmbed.image(source), null)
+    ..moveCursorToPosition(index + 1);
+}
 
 /// A labeled, boxed rich-text input: a curated Quill toolbar (bold, italic,
 /// underline, color) above an inline editor. The caller owns [controller]'s
@@ -54,7 +72,7 @@ class _RichTextEditorFieldState extends State<RichTextEditorField> {
           ),
           QuillSimpleToolbar(
             controller: widget.controller,
-            config: const QuillSimpleToolbarConfig(
+            config: QuillSimpleToolbarConfig(
               multiRowsDisplay: false,
               showDividers: false,
               showFontFamily: false,
@@ -87,6 +105,14 @@ class _RichTextEditorFieldState extends State<RichTextEditorField> {
               showSearchButton: false,
               showSubscript: false,
               showSuperscript: false,
+              embedButtons: FlutterQuillEmbeds.toolbarButtons(
+                videoButtonOptions: null,
+                imageButtonOptions: QuillToolbarImageButtonOptions(
+                  imageButtonConfig: QuillToolbarImageConfig(
+                    onImageInsertCallback: _insertPickedImage,
+                  ),
+                ),
+              ),
             ),
           ),
           Padding(
@@ -95,11 +121,17 @@ class _RichTextEditorFieldState extends State<RichTextEditorField> {
               controller: widget.controller,
               focusNode: _focusNode,
               scrollController: _scrollController,
-              config: const QuillEditorConfig(
+              config: QuillEditorConfig(
                 scrollable: false,
                 expands: false,
                 padding: EdgeInsets.zero,
                 minHeight: 56,
+                embedBuilders: FlutterQuillEmbeds.editorBuilders(
+                  videoEmbedConfig: null,
+                  imageEmbedConfig: QuillEditorImageEmbedConfig(
+                    imageProviderBuilder: cachedQuillImageProvider,
+                  ),
+                ),
               ),
             ),
           ),
