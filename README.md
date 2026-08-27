@@ -63,7 +63,7 @@ The parts with actual logic worth testing, and all are covered:
 
 ## What's not here yet
 
-No inline images in cards, no reminders/notifications, no sync — it's local-only. These are the obvious next steps if this grows past a portfolio piece.
+No inline images in cards, no reminders/notifications, no sync — it's local-only. Decks can also only be created/deleted, not renamed, and there's no combined "study everything due" across decks — review is still one deck at a time. These are the obvious next steps if this grows past a portfolio piece.
 
 ## Author
 
