@@ -10,6 +10,7 @@ import '../../features/cards/domain/usecases/delete_deck.dart';
 import '../../features/cards/domain/usecases/get_cards.dart';
 import '../../features/cards/domain/usecases/get_decks.dart';
 import '../../features/cards/domain/usecases/update_card.dart';
+import '../../features/review/domain/usecases/get_all_cards.dart';
 import '../../features/review/domain/usecases/get_due_cards.dart';
 import '../../features/review/domain/usecases/submit_review.dart';
 import '../../features/settings/data/datasources/settings_local_datasource.dart';
@@ -41,6 +42,7 @@ Future<void> initDependencies() async {
   // Review feature - usecases
   getIt.registerFactory(() => GetDueCards(getIt()));
   getIt.registerFactory(() => SubmitReview(getIt()));
+  getIt.registerFactory(() => GetAllCards(getIt()));
 
   // Stats feature - usecases
   getIt.registerFactory(() => GetReviewStats(getIt()));

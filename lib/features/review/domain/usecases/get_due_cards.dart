@@ -5,5 +5,6 @@ class GetDueCards {
   final CardRepository repository;
   GetDueCards(this.repository);
 
-  Future<List<Flashcard>> call(String deckId) => repository.getDueCards(deckId);
+  Future<List<Flashcard>> call({String? deckId}) =>
+      deckId == null ? repository.getAllDueCards() : repository.getDueCards(deckId);
 }

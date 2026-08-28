@@ -8,9 +8,10 @@ import '../widgets/flashcard_flip.dart';
 import '../widgets/rating_buttons.dart';
 
 class ReviewPage extends StatelessWidget {
-  final String deckId;
+  /// The deck to study, or null to study due cards across every deck.
+  final String? deckId;
 
-  const ReviewPage({super.key, required this.deckId});
+  const ReviewPage({super.key, this.deckId});
 
   @override
   Widget build(BuildContext context) {
@@ -19,14 +20,15 @@ class ReviewPage extends StatelessWidget {
         getDueCards: getIt(),
         submitReviewUseCase: getIt(),
         getCards: getIt(),
-      )..loadDueCards(deckId),
+        getAllCardsUseCase: getIt(),
+      )..loadDueCards(deckId: deckId),
       child: _ReviewView(deckId: deckId),
     );
   }
 }
 
 class _ReviewView extends StatelessWidget {
-  final String deckId;
+  final String? deckId;
 
   const _ReviewView({required this.deckId});
 
@@ -34,13 +36,13 @@ class _ReviewView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Study'),
+        title: Text(deckId == null ? 'Study All' : 'Study'),
         actions: [
           if (kDebugMode)
             IconButton(
               icon: const Icon(Icons.fast_forward),
               tooltip: 'Dev: skip ahead 15 min',
-              onPressed: () => context.read<ReviewCubit>().debugSkipAhead(deckId),
+              onPressed: () => context.read<ReviewCubit>().debugSkipAhead(deckId: deckId),
             ),
         ],
       ),

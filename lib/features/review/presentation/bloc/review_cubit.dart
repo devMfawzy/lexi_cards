@@ -3,6 +3,7 @@ import '../../../cards/domain/entities/flashcard.dart';
 import '../../../cards/domain/usecases/get_cards.dart';
 import '../../domain/entities/rating.dart';
 import '../../domain/scheduler/sm2_scheduler.dart';
+import '../../domain/usecases/get_all_cards.dart';
 import '../../domain/usecases/get_due_cards.dart';
 import '../../domain/usecases/submit_review.dart';
 import 'review_state.dart';
@@ -11,17 +12,21 @@ class ReviewCubit extends Cubit<ReviewState> {
   final GetDueCards getDueCards;
   final SubmitReview submitReviewUseCase;
   final GetCards getCards;
+  final GetAllCards getAllCardsUseCase;
 
   ReviewCubit({
     required this.getDueCards,
     required this.submitReviewUseCase,
     required this.getCards,
+    required this.getAllCardsUseCase,
   }) : super(const ReviewState());
 
-  Future<void> loadDueCards(String deckId) async {
+  /// Loads the due-card queue for [deckId], or across every deck when
+  /// [deckId] is null (the "Study all decks" session).
+  Future<void> loadDueCards({String? deckId}) async {
     emit(state.copyWith(isLoading: true, errorMessage: null));
     try {
-      final cards = await getDueCards(deckId);
+      final cards = await getDueCards(deckId: deckId);
       emit(state.copyWith(
         queue: cards,
         pendingRequeue: const [],
@@ -76,8 +81,8 @@ class ReviewCubit extends Cubit<ReviewState> {
   /// pending learning/relearning step doesn't have to be waited out for real
   /// during a demo. Does not persist anything - the underlying due dates are
   /// untouched, this only affects what's shown in this session's queue.
-  Future<void> debugSkipAhead(String deckId, {Duration by = const Duration(minutes: 15)}) async {
-    final cards = await getCards(deckId);
+  Future<void> debugSkipAhead({String? deckId, Duration by = const Duration(minutes: 15)}) async {
+    final cards = deckId == null ? await getAllCardsUseCase() : await getCards(deckId);
     final simulatedNow = DateTime.now().add(by);
 
     final due = cards

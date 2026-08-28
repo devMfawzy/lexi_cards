@@ -26,6 +26,11 @@ final appRouter = GoRouter(
           ReviewPage(deckId: state.pathParameters['deckId']!),
     ),
     GoRoute(
+      path: '/study',
+      name: 'studyAll',
+      builder: (context, state) => const ReviewPage(),
+    ),
+    GoRoute(
       path: '/stats',
       name: 'stats',
       builder: (context, state) => const StatsPage(),

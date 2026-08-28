@@ -78,10 +78,14 @@ class CardRepositoryImpl implements CardRepository {
   }
 
   @override
-  Future<List<Flashcard>> getDueCards(String deckId) async {
+  Future<List<Flashcard>> getDueCards(String deckId) async => _selectDue(await getCards(deckId));
+
+  @override
+  Future<List<Flashcard>> getAllDueCards() async => _selectDue(await getAllCards());
+
+  List<Flashcard> _selectDue(List<Flashcard> cards) {
     final now = DateTime.now();
     final endOfToday = DateTime(now.year, now.month, now.day + 1);
-    final cards = await getCards(deckId);
 
     final learningDue = cards
         .where((c) =>

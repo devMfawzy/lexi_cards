@@ -18,6 +18,7 @@ abstract class CardRepository {
 
   // Review support
   Future<List<Flashcard>> getDueCards(String deckId);
+  Future<List<Flashcard>> getAllDueCards();
   Future<void> addReviewLog(ReviewLog log);
   Future<List<ReviewLog>> getReviewLogs(String cardId);
   Future<List<ReviewLog>> getAllReviewLogs();

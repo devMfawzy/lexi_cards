@@ -64,13 +64,20 @@ class _DecksView extends StatelessWidget {
               message: 'No decks yet. Tap + to create one.',
             );
           }
+          final totalDue = state.summaries.fold<int>(0, (sum, s) => sum + s.dueCount);
           return RefreshIndicator(
             onRefresh: () => context.read<DecksCubit>().loadDecks(),
             child: ListView.builder(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-              itemCount: state.summaries.length,
+              itemCount: state.summaries.length + 1,
               itemBuilder: (context, index) {
-                final summary = state.summaries[index];
+                if (index == 0) {
+                  return _StudyAllHeader(
+                    dueCount: totalDue,
+                    onTap: () => context.push('/study'),
+                  );
+                }
+                final summary = state.summaries[index - 1];
                 return DeckListTile(
                   summary: summary,
                   onTap: () => context.push('/decks/${summary.deck.id}'),
@@ -94,6 +101,61 @@ class _DecksView extends StatelessWidget {
           }
         },
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class _StudyAllHeader extends StatelessWidget {
+  final int dueCount;
+  final VoidCallback onTap;
+
+  const _StudyAllHeader({required this.dueCount, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Card(
+        color: colorScheme.primaryContainer,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 12, 16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Study all decks',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: colorScheme.onPrimaryContainer,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '$dueCount due',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onPrimaryContainer,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.play_circle_fill, color: colorScheme.onPrimaryContainer, size: 36),
+                  tooltip: 'Study all decks',
+                  onPressed: onTap,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

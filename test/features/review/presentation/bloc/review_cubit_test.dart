@@ -5,6 +5,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:lexi_cards/features/cards/domain/entities/flashcard.dart';
 import 'package:lexi_cards/features/cards/domain/usecases/get_cards.dart';
 import 'package:lexi_cards/features/review/domain/entities/rating.dart';
+import 'package:lexi_cards/features/review/domain/usecases/get_all_cards.dart';
 import 'package:lexi_cards/features/review/domain/usecases/get_due_cards.dart';
 import 'package:lexi_cards/features/review/domain/usecases/submit_review.dart';
 import 'package:lexi_cards/features/review/presentation/bloc/review_cubit.dart';
@@ -16,6 +17,8 @@ class MockSubmitReview extends Mock implements SubmitReview {}
 
 class MockGetCards extends Mock implements GetCards {}
 
+class MockGetAllCards extends Mock implements GetAllCards {}
+
 void main() {
   const deckId = 'deck-1';
   final createdAt = DateTime(2026, 1, 1);
@@ -23,6 +26,7 @@ void main() {
   late MockGetDueCards getDueCards;
   late MockSubmitReview submitReview;
   late MockGetCards getCards;
+  late MockGetAllCards getAllCards;
 
   Flashcard cardWith({
     required String id,
@@ -53,13 +57,32 @@ void main() {
     getDueCards = MockGetDueCards();
     submitReview = MockSubmitReview();
     getCards = MockGetCards();
+    getAllCards = MockGetAllCards();
   });
 
   ReviewCubit buildCubit() => ReviewCubit(
         getDueCards: getDueCards,
         submitReviewUseCase: submitReview,
         getCards: getCards,
+        getAllCardsUseCase: getAllCards,
       );
+
+  group('loadDueCards', () {
+    blocTest<ReviewCubit, ReviewState>(
+      'with no deckId loads due cards across every deck',
+      build: () {
+        final fromEnglish = cardWith(id: 'a');
+        final fromTest = cardWith(id: 'b');
+        when(() => getDueCards(deckId: null)).thenAnswer((_) async => [fromEnglish, fromTest]);
+        return buildCubit();
+      },
+      act: (cubit) => cubit.loadDueCards(),
+      verify: (cubit) {
+        verify(() => getDueCards(deckId: null)).called(1);
+        expect(cubit.state.queue.map((c) => c.id), ['a', 'b']);
+      },
+    );
+  });
 
   group('submitRating', () {
     blocTest<ReviewCubit, ReviewState>(
@@ -67,7 +90,7 @@ void main() {
       build: () {
         final cardA = cardWith(id: 'a');
         final cardB = cardWith(id: 'b');
-        when(() => getDueCards(deckId)).thenAnswer((_) async => [cardA, cardB]);
+        when(() => getDueCards(deckId: deckId)).thenAnswer((_) async => [cardA, cardB]);
         when(() => submitReview('a', any())).thenAnswer(
           (_) async => cardA.copyWith(
             state: CardState.relearning,
@@ -77,7 +100,7 @@ void main() {
         return buildCubit();
       },
       act: (cubit) async {
-        await cubit.loadDueCards(deckId);
+        await cubit.loadDueCards(deckId: deckId);
         await cubit.submitRating(Rating.again, now: createdAt);
       },
       verify: (cubit) {
@@ -91,7 +114,7 @@ void main() {
       build: () {
         final cardA = cardWith(id: 'a');
         final cardB = cardWith(id: 'b');
-        when(() => getDueCards(deckId)).thenAnswer((_) async => [cardA, cardB]);
+        when(() => getDueCards(deckId: deckId)).thenAnswer((_) async => [cardA, cardB]);
         when(() => submitReview('a', any())).thenAnswer(
           (_) async => cardA.copyWith(
             state: CardState.relearning,
@@ -107,7 +130,7 @@ void main() {
         return buildCubit();
       },
       act: (cubit) async {
-        await cubit.loadDueCards(deckId);
+        await cubit.loadDueCards(deckId: deckId);
         // Rate 'a' — not yet due again (10 min away), so it's held pending.
         await cubit.submitRating(Rating.again, now: createdAt);
         // Rate 'b' 15 minutes later (in-session elapsed time) — 'a' is now due.
@@ -126,7 +149,7 @@ void main() {
       'does not hold back a card that graduates to full review state',
       build: () {
         final cardA = cardWith(id: 'a');
-        when(() => getDueCards(deckId)).thenAnswer((_) async => [cardA]);
+        when(() => getDueCards(deckId: deckId)).thenAnswer((_) async => [cardA]);
         when(() => submitReview('a', any())).thenAnswer(
           (_) async => cardA.copyWith(
             state: CardState.review,
@@ -136,7 +159,7 @@ void main() {
         return buildCubit();
       },
       act: (cubit) async {
-        await cubit.loadDueCards(deckId);
+        await cubit.loadDueCards(deckId: deckId);
         await cubit.submitRating(Rating.easy, now: createdAt);
       },
       verify: (cubit) {
@@ -152,7 +175,7 @@ void main() {
         final cardA = cardWith(id: 'a');
         final cardB = cardWith(id: 'b');
         final cardC = cardWith(id: 'c');
-        when(() => getDueCards(deckId)).thenAnswer((_) async => [cardA, cardB, cardC]);
+        when(() => getDueCards(deckId: deckId)).thenAnswer((_) async => [cardA, cardB, cardC]);
         when(() => submitReview('a', any())).thenAnswer(
           (_) async => cardA.copyWith(
             state: CardState.relearning,
@@ -168,7 +191,7 @@ void main() {
         return buildCubit();
       },
       act: (cubit) async {
-        await cubit.loadDueCards(deckId);
+        await cubit.loadDueCards(deckId: deckId);
         await cubit.submitRating(Rating.again, now: createdAt); // holds 'a' (10m away)
         // Only 2 minutes have passed — 'a' still isn't due, 'b' just landed pending too.
         await cubit.submitRating(
