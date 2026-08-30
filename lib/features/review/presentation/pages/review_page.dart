@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/widgets/ltr_text.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../bloc/review_cubit.dart';
 import '../bloc/review_state.dart';
 import '../widgets/flashcard_flip.dart';
@@ -34,14 +36,18 @@ class _ReviewView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text(deckId == null ? 'Study All' : 'Study'),
+        title: Text(deckId == null ? l10n.studyAllTitle : l10n.study),
         actions: [
           if (kDebugMode)
             IconButton(
-              icon: const Icon(Icons.fast_forward),
-              tooltip: 'Dev: skip ahead 15 min',
+              icon: Transform.flip(
+                flipX: Directionality.of(context) == TextDirection.rtl,
+                child: const Icon(Icons.fast_forward),
+              ),
+              tooltip: l10n.devSkipAheadTooltip,
               onPressed: () => context.read<ReviewCubit>().debugSkipAhead(deckId: deckId),
             ),
         ],
@@ -74,12 +80,12 @@ class _ReviewView extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    'All caught up!',
+                    l10n.allCaughtUp,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Reviewed ${state.reviewedCount} card${state.reviewedCount == 1 ? '' : 's'}.',
+                    l10n.reviewedCount(state.reviewedCount),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -103,7 +109,7 @@ class _ReviewView extends StatelessWidget {
                   child: LinearProgressIndicator(value: progress, minHeight: 6),
                 ),
                 const SizedBox(height: 8),
-                Text(
+                LtrText(
                   '${state.reviewedCount} / $total',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -126,7 +132,7 @@ class _ReviewView extends StatelessWidget {
                 if (!state.showAnswer)
                   ElevatedButton(
                     onPressed: () => context.read<ReviewCubit>().revealAnswer(),
-                    child: const Text('Show Answer'),
+                    child: Text(l10n.showAnswer),
                   )
                 else
                   RatingButtons(

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/widgets/empty_state.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/flashcard.dart';
 import '../bloc/cards_cubit.dart';
 import '../bloc/cards_state.dart';
@@ -36,13 +37,14 @@ class _CardsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cards'),
+        title: Text(l10n.cardsTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.play_circle_outline),
-            tooltip: 'Study',
+            tooltip: l10n.study,
             onPressed: () => context.push('/decks/$deckId/review'),
           ),
         ],
@@ -60,9 +62,9 @@ class _CardsView extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (state.cards.isEmpty) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.note_add_outlined,
-              message: 'No cards yet. Add one below.',
+              message: l10n.noCardsYet,
             );
           }
           return ListView.builder(

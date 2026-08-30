@@ -55,12 +55,15 @@ bool isContentBlank(String raw) {
 }
 
 /// List-preview label for a card face: the plain text, or — when there's no
-/// text but the content isn't actually blank (e.g. an image-only card) — a
-/// placeholder so the row doesn't render as an empty/broken line.
-String cardPreviewLabel(String raw) {
+/// text but the content isn't actually blank (e.g. an image-only card) — the
+/// caller-supplied [imagePlaceholder] so the row doesn't render as an
+/// empty/broken line. Takes the placeholder as a parameter rather than
+/// hardcoding it since this file is deliberately Flutter-widget-free (no
+/// `BuildContext`, so it can't call `AppLocalizations.of(context)` itself).
+String cardPreviewLabel(String raw, {required String imagePlaceholder}) {
   final text = plainTextPreview(raw);
   if (text.isNotEmpty) return text;
-  return isContentBlank(raw) ? '' : '📷 Image';
+  return isContentBlank(raw) ? '' : imagePlaceholder;
 }
 
 String mimeTypeForPath(String path) {

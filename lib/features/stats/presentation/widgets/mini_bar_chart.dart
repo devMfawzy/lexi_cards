@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../domain/entities/review_stats.dart';
 
 class MiniBarChart extends StatelessWidget {
@@ -13,11 +14,13 @@ class MiniBarChart extends StatelessWidget {
     required this.color,
   });
 
-  static const _weekdayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    // CLDR-backed short weekday name for the active locale — correct for
+    // any language automatically, no per-locale abbreviation list to keep
+    // translated by hand.
+    final weekdayFormat = DateFormat.E(Localizations.localeOf(context).toString());
     final maxCount = data.fold<int>(0, (max, d) => d.count > max ? d.count : max);
     final safeMax = maxCount == 0 ? 1 : maxCount;
 
@@ -56,7 +59,7 @@ class MiniBarChart extends StatelessWidget {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            _weekdayLabels[d.date.weekday - 1],
+                            weekdayFormat.format(d.date),
                             style: Theme.of(context)
                                 .textTheme
                                 .labelSmall

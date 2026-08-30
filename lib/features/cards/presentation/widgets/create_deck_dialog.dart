@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class CreateDeckDialog extends StatefulWidget {
   const CreateDeckDialog({super.key});
@@ -18,17 +19,18 @@ class _CreateDeckDialogState extends State<CreateDeckDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('New deck'),
+      title: Text(l10n.newDeckTitle),
       content: TextField(
         controller: _nameController,
-        decoration: const InputDecoration(labelText: 'Deck name'),
+        decoration: InputDecoration(labelText: l10n.deckNameLabel),
         autofocus: true,
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
         ElevatedButton(
           onPressed: () {
@@ -36,7 +38,7 @@ class _CreateDeckDialogState extends State<CreateDeckDialog> {
             if (name.isEmpty) return;
             Navigator.of(context).pop(name);
           },
-          child: const Text('Create'),
+          child: Text(l10n.create),
         ),
       ],
     );

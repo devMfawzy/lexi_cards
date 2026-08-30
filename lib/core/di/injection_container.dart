@@ -18,6 +18,7 @@ import '../../features/settings/data/repositories/settings_repository_impl.dart'
 import '../../features/settings/domain/repositories/settings_repository.dart';
 import '../../features/settings/domain/usecases/get_reminder_settings.dart';
 import '../../features/settings/domain/usecases/save_reminder_settings.dart';
+import '../../features/settings/presentation/bloc/locale_cubit.dart';
 import '../../features/stats/domain/usecases/get_review_stats.dart';
 import '../notifications/notification_service.dart';
 
@@ -59,4 +60,7 @@ Future<void> initDependencies() async {
   // Settings feature - usecases
   getIt.registerFactory(() => GetReminderSettings(getIt()));
   getIt.registerFactory(() => SaveReminderSettings(getIt()));
+
+  // Locale - app-wide singleton (see LocaleCubit doc comment)
+  getIt.registerLazySingleton<LocaleCubit>(() => LocaleCubit(repository: getIt()));
 }

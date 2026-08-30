@@ -76,7 +76,7 @@ void main() {
       },
       verify: (cubit) {
         expect(cubit.state.settings.enabled, isFalse);
-        expect(cubit.state.errorMessage, isNotNull);
+        expect(cubit.state.feedback, SettingsFeedback.reminderPermissionDenied);
         verifyNever(() => notificationService.scheduleDailyReminder(
               hour: any(named: 'hour'),
               minute: any(named: 'minute'),
@@ -141,6 +141,41 @@ void main() {
               hour: any(named: 'hour'),
               minute: any(named: 'minute'),
             ));
+      },
+    );
+  });
+
+  group('sendTestNotification', () {
+    blocTest<SettingsCubit, SettingsState>(
+      'surfaces success feedback when permission is granted',
+      build: () {
+        when(() => notificationService.requestPermission()).thenAnswer((_) async => true);
+        when(() => notificationService.showTestNotification()).thenAnswer((_) async {});
+        return buildCubit();
+      },
+      act: (cubit) async {
+        await cubit.load();
+        await cubit.sendTestNotification();
+      },
+      verify: (cubit) {
+        expect(cubit.state.feedback, SettingsFeedback.testNotificationSent);
+        verify(() => notificationService.showTestNotification()).called(1);
+      },
+    );
+
+    blocTest<SettingsCubit, SettingsState>(
+      'surfaces denial feedback and never sends when permission is denied',
+      build: () {
+        when(() => notificationService.requestPermission()).thenAnswer((_) async => false);
+        return buildCubit();
+      },
+      act: (cubit) async {
+        await cubit.load();
+        await cubit.sendTestNotification();
+      },
+      verify: (cubit) {
+        expect(cubit.state.feedback, SettingsFeedback.testPermissionDenied);
+        verifyNever(() => notificationService.showTestNotification());
       },
     );
   });

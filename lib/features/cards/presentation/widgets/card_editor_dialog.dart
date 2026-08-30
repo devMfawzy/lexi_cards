@@ -3,6 +3,7 @@ import 'package:flutter_quill/flutter_quill.dart';
 
 import '../../../../core/rich_text/quill_content.dart';
 import '../../../../core/widgets/rich_text_editor_field.dart';
+import '../../../../l10n/app_localizations.dart';
 
 /// Create or edit a card's front/back. Pass [initialFront]/[initialBack]
 /// (stored Delta JSON, or legacy plain text) to edit an existing card;
@@ -39,17 +40,18 @@ class _CardEditorDialogState extends State<CardEditorDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: Text(widget.isEditing ? 'Edit card' : 'New card'),
+      title: Text(widget.isEditing ? l10n.editCardTitle : l10n.newCardTitle),
       content: SizedBox(
         width: double.maxFinite,
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              RichTextEditorField(controller: _frontController, label: 'Front'),
+              RichTextEditorField(controller: _frontController, label: l10n.frontLabel),
               const SizedBox(height: 12),
-              RichTextEditorField(controller: _backController, label: 'Back'),
+              RichTextEditorField(controller: _backController, label: l10n.backLabel),
             ],
           ),
         ),
@@ -57,7 +59,7 @@ class _CardEditorDialogState extends State<CardEditorDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
         ElevatedButton(
           onPressed: () {
@@ -66,7 +68,7 @@ class _CardEditorDialogState extends State<CardEditorDialog> {
             if (isContentBlank(front) || isContentBlank(back)) return;
             Navigator.of(context).pop((front, back));
           },
-          child: Text(widget.isEditing ? 'Save' : 'Add'),
+          child: Text(widget.isEditing ? l10n.save : l10n.add),
         ),
       ],
     );

@@ -35,4 +35,19 @@ void main() {
 
     expect(loaded, const ReminderSettings(enabled: true, hour: 7, minute: 45));
   });
+
+  test('returns a null language code when nothing has been saved yet (system default)', () async {
+    expect(await repository.getLanguageCode(), isNull);
+  });
+
+  test('round-trips a saved language code', () async {
+    await repository.saveLanguageCode('ar');
+    expect(await repository.getLanguageCode(), 'ar');
+  });
+
+  test('saving null clears back to system default', () async {
+    await repository.saveLanguageCode('ar');
+    await repository.saveLanguageCode(null);
+    expect(await repository.getLanguageCode(), isNull);
+  });
 }

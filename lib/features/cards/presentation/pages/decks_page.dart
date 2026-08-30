@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/widgets/empty_state.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../bloc/decks_cubit.dart';
 import '../bloc/decks_state.dart';
 import '../widgets/create_deck_dialog.dart';
@@ -30,18 +31,19 @@ class _DecksView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Decks'),
+        title: Text(l10n.myDecksTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.insights_outlined),
-            tooltip: 'Stats',
+            tooltip: l10n.statsTooltip,
             onPressed: () => context.push('/stats'),
           ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
-            tooltip: 'Settings',
+            tooltip: l10n.settingsTooltip,
             onPressed: () => context.push('/settings'),
           ),
         ],
@@ -59,9 +61,9 @@ class _DecksView extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (state.summaries.isEmpty) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.style_outlined,
-              message: 'No decks yet. Tap + to create one.',
+              message: l10n.noDecksYet,
             );
           }
           final totalDue = state.summaries.fold<int>(0, (sum, s) => sum + s.dueCount);
@@ -114,6 +116,7 @@ class _StudyAllHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -131,7 +134,7 @@ class _StudyAllHeader extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Study all decks',
+                        l10n.studyAllDecksHeader,
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: colorScheme.onPrimaryContainer,
@@ -139,7 +142,7 @@ class _StudyAllHeader extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '$dueCount due',
+                        l10n.dueCount(dueCount),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: colorScheme.onPrimaryContainer,
                             ),
@@ -149,7 +152,7 @@ class _StudyAllHeader extends StatelessWidget {
                 ),
                 IconButton(
                   icon: Icon(Icons.play_circle_fill, color: colorScheme.onPrimaryContainer, size: 36),
-                  tooltip: 'Study all decks',
+                  tooltip: l10n.studyAllDecksHeader,
                   onPressed: onTap,
                 ),
               ],

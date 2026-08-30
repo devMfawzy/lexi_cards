@@ -9,6 +9,7 @@ import 'package:lexi_cards/features/cards/domain/usecases/delete_deck.dart';
 import 'package:lexi_cards/features/cards/domain/usecases/get_cards.dart';
 import 'package:lexi_cards/features/cards/domain/usecases/get_decks.dart';
 import 'package:lexi_cards/features/cards/presentation/pages/decks_page.dart';
+import 'package:lexi_cards/l10n/app_localizations.dart';
 
 class MockGetDecks extends Mock implements GetDecks {}
 
@@ -35,7 +36,12 @@ void main() {
 
   testWidgets('Decks page shows empty state when there are no decks',
       (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: DecksPage()));
+    await tester.pumpWidget(const MaterialApp(
+      locale: Locale('en'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: DecksPage(),
+    ));
     await tester.pump();
 
     expect(find.text('My Decks'), findsOneWidget);

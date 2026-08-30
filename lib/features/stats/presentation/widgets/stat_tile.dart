@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/ltr_text.dart';
 
 class StatTile extends StatelessWidget {
   final IconData icon;
@@ -24,7 +25,7 @@ class StatTile extends StatelessWidget {
           children: [
             Icon(icon, color: colorScheme.primary),
             const SizedBox(height: 12),
-            Text(
+            LtrText(
               value,
               style: Theme.of(context)
                   .textTheme

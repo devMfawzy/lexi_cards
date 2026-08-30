@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/ltr_text.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/rating.dart';
 
 class RatingButtons extends StatelessWidget {
@@ -12,13 +14,6 @@ class RatingButtons extends StatelessWidget {
     required this.onRate,
   });
 
-  static const _labels = {
-    Rating.again: 'Again',
-    Rating.hard: 'Hard',
-    Rating.good: 'Good',
-    Rating.easy: 'Easy',
-  };
-
   static const _colors = {
     Rating.again: RatingColors.again,
     Rating.hard: RatingColors.hard,
@@ -26,14 +21,28 @@ class RatingButtons extends StatelessWidget {
     Rating.easy: RatingColors.easy,
   };
 
-  String _format(Duration d) {
-    if (d.inDays >= 1) return '${d.inDays}d';
-    if (d.inHours >= 1) return '${d.inHours}h';
-    return '${d.inMinutes.clamp(1, 59)}m';
+  String _label(AppLocalizations l10n, Rating rating) {
+    switch (rating) {
+      case Rating.again:
+        return l10n.ratingAgain;
+      case Rating.hard:
+        return l10n.ratingHard;
+      case Rating.good:
+        return l10n.ratingGood;
+      case Rating.easy:
+        return l10n.ratingEasy;
+    }
+  }
+
+  String _format(AppLocalizations l10n, Duration d) {
+    if (d.inDays >= 1) return l10n.durationDays(d.inDays);
+    if (d.inHours >= 1) return l10n.durationHours(d.inHours);
+    return l10n.durationMinutes(d.inMinutes.clamp(1, 59));
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       children: Rating.values.map((rating) {
         final preview = previews[rating];
@@ -51,10 +60,10 @@ class RatingButtons extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(_labels[rating]!, style: const TextStyle(fontWeight: FontWeight.w700)),
+                  Text(_label(l10n, rating), style: const TextStyle(fontWeight: FontWeight.w700)),
                   if (preview != null)
-                    Text(
-                      _format(preview),
+                    LtrText(
+                      _format(l10n, preview),
                       style: const TextStyle(fontSize: 11),
                     ),
                 ],

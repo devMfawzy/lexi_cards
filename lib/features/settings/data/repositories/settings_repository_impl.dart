@@ -12,4 +12,11 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   Future<void> saveReminderSettings(ReminderSettings settings) =>
       localDataSource.saveReminderSettings(settings);
+
+  @override
+  Future<String?> getLanguageCode() => localDataSource.getLanguageCode();
+
+  @override
+  Future<void> saveLanguageCode(String? languageCode) =>
+      localDataSource.saveLanguageCode(languageCode);
 }

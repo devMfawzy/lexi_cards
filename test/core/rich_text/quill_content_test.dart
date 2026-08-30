@@ -90,16 +90,22 @@ void main() {
 
   group('cardPreviewLabel', () {
     test('behaves like plainTextPreview when there is text', () {
-      expect(cardPreviewLabel('Hello world'), 'Hello world');
+      expect(
+        cardPreviewLabel('Hello world', imagePlaceholder: '📷 Image'),
+        'Hello world',
+      );
     });
 
-    test('falls back to an image placeholder for an image-only card', () {
+    test('falls back to the caller-supplied placeholder for an image-only card', () {
       const raw = '[{"insert":{"image":"data:image/png;base64,AAAA"}},{"insert":"\\n"}]';
-      expect(cardPreviewLabel(raw), '📷 Image');
+      expect(
+        cardPreviewLabel(raw, imagePlaceholder: '📷 Image'),
+        '📷 Image',
+      );
     });
 
     test('is empty for a genuinely blank card', () {
-      expect(cardPreviewLabel(''), isEmpty);
+      expect(cardPreviewLabel('', imagePlaceholder: '📷 Image'), isEmpty);
     });
   });
 

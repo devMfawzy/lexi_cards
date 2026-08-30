@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/empty_state.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../bloc/stats_cubit.dart';
 import '../bloc/stats_state.dart';
 import '../widgets/mini_bar_chart.dart';
@@ -25,8 +26,9 @@ class _StatsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Stats')),
+      appBar: AppBar(title: Text(l10n.statsTitle)),
       body: BlocConsumer<StatsCubit, StatsState>(
         listener: (context, state) {
           if (state.errorMessage != null) {
@@ -41,9 +43,9 @@ class _StatsView extends StatelessWidget {
           }
           final stats = state.stats;
           if (stats == null || stats.totalCards == 0) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.insights_outlined,
-              message: 'No stats yet. Add some cards and start reviewing.',
+              message: l10n.noStatsYet,
             );
           }
           return RefreshIndicator(
@@ -61,35 +63,35 @@ class _StatsView extends StatelessWidget {
                   children: [
                     StatTile(
                       icon: Icons.local_fire_department_outlined,
-                      label: 'Day streak',
+                      label: l10n.dayStreak,
                       value: '${stats.currentStreakDays}',
                     ),
                     StatTile(
                       icon: Icons.emoji_events_outlined,
-                      label: 'Longest streak',
+                      label: l10n.longestStreak,
                       value: '${stats.longestStreakDays}',
                     ),
                     StatTile(
                       icon: Icons.check_circle_outline,
-                      label: 'Retention',
+                      label: l10n.retention,
                       value: '${(stats.retentionRate * 100).round()}%',
                     ),
                     StatTile(
                       icon: Icons.style_outlined,
-                      label: 'Cards learned',
+                      label: l10n.cardsLearned,
                       value: '${stats.cardsInProgress}/${stats.totalCards}',
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
                 MiniBarChart(
-                  title: 'Reviews — last 7 days',
+                  title: l10n.reviewsLast7Days,
                   data: stats.reviewsLast7Days,
                   color: RatingColors.good,
                 ),
                 const SizedBox(height: 16),
                 MiniBarChart(
-                  title: 'Due — next 7 days',
+                  title: l10n.dueNext7Days,
                   data: stats.dueNext7Days,
                   color: CardStateColors.newCard,
                 ),

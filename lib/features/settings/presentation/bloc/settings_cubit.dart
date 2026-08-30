@@ -41,10 +41,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     try {
       final granted = await notificationService.requestPermission();
       if (!granted) {
-        emit(state.copyWith(
-          errorMessage:
-              'Notifications permission was denied. Enable it in system settings to use reminders.',
-        ));
+        emit(state.copyWith(feedback: SettingsFeedback.reminderPermissionDenied));
         return;
       }
       final updated = state.settings.copyWith(enabled: true);
@@ -73,13 +70,11 @@ class SettingsCubit extends Cubit<SettingsState> {
     try {
       final granted = await notificationService.requestPermission();
       if (!granted) {
-        emit(state.copyWith(errorMessage: 'Notifications permission was denied.'));
+        emit(state.copyWith(feedback: SettingsFeedback.testPermissionDenied));
         return;
       }
       await notificationService.showTestNotification();
-      emit(state.copyWith(
-        infoMessage: 'Test notification sent — it should arrive in a few seconds.',
-      ));
+      emit(state.copyWith(feedback: SettingsFeedback.testNotificationSent));
     } catch (e) {
       emit(state.copyWith(errorMessage: e.toString()));
     }

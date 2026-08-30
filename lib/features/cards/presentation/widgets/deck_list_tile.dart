@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../bloc/decks_state.dart';
 
 class DeckListTile extends StatelessWidget {
@@ -15,22 +16,20 @@ class DeckListTile extends StatelessWidget {
     required this.onDelete,
   });
 
-  Future<bool> _confirmDelete(BuildContext context) async {
+  Future<bool> _confirmDelete(BuildContext context, AppLocalizations l10n) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete deck?'),
-        content: Text(
-          'This deletes "${summary.deck.name}" and all its cards. This cannot be undone.',
-        ),
+        title: Text(l10n.deleteDeckTitle),
+        content: Text(l10n.deleteDeckBody(summary.deck.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -40,12 +39,13 @@ class DeckListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Dismissible(
       key: ValueKey(summary.deck.id),
       direction: DismissDirection.endToStart,
-      confirmDismiss: (_) => _confirmDelete(context),
+      confirmDismiss: (_) => _confirmDelete(context, l10n),
       onDismissed: (_) => onDelete(),
       background: Container(
         alignment: Alignment.centerRight,
@@ -81,13 +81,13 @@ class DeckListTile extends StatelessWidget {
                         Row(
                           children: [
                             _StatPill(
-                              label: '${summary.dueCount} due',
+                              label: l10n.dueCount(summary.dueCount),
                               color: colorScheme.primaryContainer,
                               onColor: colorScheme.onPrimaryContainer,
                             ),
                             const SizedBox(width: 8),
                             _StatPill(
-                              label: '${summary.newCount} new',
+                              label: l10n.newCount(summary.newCount),
                               color: colorScheme.secondaryContainer,
                               onColor: colorScheme.onSecondaryContainer,
                             ),
@@ -98,7 +98,7 @@ class DeckListTile extends StatelessWidget {
                   ),
                   IconButton(
                     icon: Icon(Icons.play_circle_fill, color: colorScheme.primary, size: 36),
-                    tooltip: 'Study',
+                    tooltip: l10n.study,
                     onPressed: onStudy,
                   ),
                 ],

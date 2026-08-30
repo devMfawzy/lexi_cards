@@ -4,12 +4,15 @@ import '../../domain/entities/reminder_settings.dart';
 abstract class SettingsLocalDataSource {
   Future<ReminderSettings> getReminderSettings();
   Future<void> saveReminderSettings(ReminderSettings settings);
+  Future<String?> getLanguageCode();
+  Future<void> saveLanguageCode(String? languageCode);
 }
 
 class SettingsLocalDataSourceImpl implements SettingsLocalDataSource {
   static const _enabledKey = 'reminder_enabled';
   static const _hourKey = 'reminder_hour';
   static const _minuteKey = 'reminder_minute';
+  static const _languageCodeKey = 'language_code';
 
   @override
   Future<ReminderSettings> getReminderSettings() async {
@@ -29,5 +32,21 @@ class SettingsLocalDataSourceImpl implements SettingsLocalDataSource {
     await prefs.setBool(_enabledKey, settings.enabled);
     await prefs.setInt(_hourKey, settings.hour);
     await prefs.setInt(_minuteKey, settings.minute);
+  }
+
+  @override
+  Future<String?> getLanguageCode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_languageCodeKey);
+  }
+
+  @override
+  Future<void> saveLanguageCode(String? languageCode) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (languageCode == null) {
+      await prefs.remove(_languageCodeKey);
+    } else {
+      await prefs.setString(_languageCodeKey, languageCode);
+    }
   }
 }
