@@ -13,7 +13,7 @@ I built this as a portfolio piece to show a complete, non-trivial Flutter app: c
 
 ## What's in it
 
-- **Decks & cards** — create decks, add/edit/delete cards. Front and back support rich text (bold, italic, underline, color) via a curated Quill toolbar, Anki-style, plus inline images (gallery, camera, or a pasted link) stored as base64 data URIs inline in the same field — no separate media store.
+- **Decks & cards** — create, rename, and delete decks (long-press a deck for Rename/Browse/Delete), add/edit/delete cards. Front and back support rich text (bold, italic, underline, color) via a curated Quill toolbar, Anki-style, plus inline images (gallery, camera, or a pasted link) stored as base64 data URIs inline in the same field — no separate media store.
 - **Review sessions** — due cards are pulled per deck, or across every deck at once via "Study all decks" on the deck list (overdue learning/relearning cards first, then cards due today, then new cards, sorted globally either way), shown one at a time with a flip animation, and rated on a 4-button scale. A card that lands back in learning/relearning (short SM-2 steps, minutes away) stays in the same session — it's held in a pending list and spliced back into the queue once it's due, instead of only reappearing on the next reload.
 - **SM-2 scheduling** — new cards go through short learning steps (1m → 10m) before graduating into day-scale review intervals. Ease factor adjusts per rating, lapses send a card back to relearning. Config lives in one place (`sm2_config.dart`) so the constants aren't scattered through the scheduler.
 - **Stats screen** — every review was already being logged (`ReviewLog`: rating, interval before/after, ease before/after) but nothing surfaced it. Added a screen for current/longest streak, retention rate, and 7-day bar charts for reviews done vs. cards coming due.
@@ -90,7 +90,7 @@ The parts with actual logic worth testing, and all are covered:
 
 ## What's not here yet
 
-No sync — it's local-only. Decks can also only be created/deleted, not renamed. Picked images aren't compressed/resized before being inlined, so a full-resolution photo can meaningfully bloat a card. Arabic RTL relies on Flutter's automatic `Directionality` mirroring rather than a pixel-perfect audit of every fixed padding/alignment value — no known issues, but not exhaustively checked either. These are the obvious next steps if this grows past a portfolio piece.
+No sync — it's local-only. Picked images aren't compressed/resized before being inlined, so a full-resolution photo can meaningfully bloat a card. Arabic RTL relies on Flutter's automatic `Directionality` mirroring rather than a pixel-perfect audit of every fixed padding/alignment value — no known issues, but not exhaustively checked either. These are the obvious next steps if this grows past a portfolio piece.
 
 ## Author
 

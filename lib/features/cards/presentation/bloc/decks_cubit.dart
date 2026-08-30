@@ -4,17 +4,20 @@ import '../../domain/usecases/create_deck.dart';
 import '../../domain/usecases/delete_deck.dart';
 import '../../domain/usecases/get_cards.dart';
 import '../../domain/usecases/get_decks.dart';
+import '../../domain/usecases/rename_deck.dart';
 import 'decks_state.dart';
 
 class DecksCubit extends Cubit<DecksState> {
   final GetDecks getDecks;
   final CreateDeck createDeckUseCase;
+  final RenameDeck renameDeckUseCase;
   final DeleteDeck deleteDeckUseCase;
   final GetCards getCards;
 
   DecksCubit({
     required this.getDecks,
     required this.createDeckUseCase,
+    required this.renameDeckUseCase,
     required this.deleteDeckUseCase,
     required this.getCards,
   }) : super(const DecksState());
@@ -42,6 +45,15 @@ class DecksCubit extends Cubit<DecksState> {
   Future<void> createDeck(String name) async {
     try {
       await createDeckUseCase(name);
+      await loadDecks();
+    } catch (e) {
+      emit(state.copyWith(errorMessage: e.toString()));
+    }
+  }
+
+  Future<void> renameDeck(String id, String name) async {
+    try {
+      await renameDeckUseCase(id, name);
       await loadDecks();
     } catch (e) {
       emit(state.copyWith(errorMessage: e.toString()));

@@ -16,8 +16,10 @@
   "dueCount": "{count} مستحقة",
   "newCount": "{count} جديدة",
   "newDeckTitle": "مجموعة جديدة",
+  "renameDeckTitle": "إعادة تسمية المجموعة",
   "deckNameLabel": "اسم المجموعة",
   "create": "إنشاء",
+  "browseCards": "تصفح البطاقات",
   "deleteDeckTitle": "حذف المجموعة؟",
   "deleteDeckBody": "سيؤدي هذا إلى حذف \"{deckName}\" وجميع بطاقاتها. لا يمكن التراجع عن هذا الإجراء.",
 

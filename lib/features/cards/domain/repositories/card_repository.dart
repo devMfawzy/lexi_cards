@@ -6,6 +6,7 @@ abstract class CardRepository {
   // Decks
   Future<List<Deck>> getDecks();
   Future<Deck> createDeck(String name);
+  Future<Deck> renameDeck(String id, String name);
   Future<void> deleteDeck(String id);
 
   // Cards

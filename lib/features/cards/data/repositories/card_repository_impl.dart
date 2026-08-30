@@ -34,6 +34,15 @@ class CardRepositoryImpl implements CardRepository {
   }
 
   @override
+  Future<Deck> renameDeck(String id, String name) async {
+    final model = await localDataSource.getDeck(id);
+    if (model == null) throw Exception('Deck not found: $id');
+    model.name = name;
+    final saved = await localDataSource.saveDeck(model);
+    return saved.toEntity();
+  }
+
+  @override
   Future<void> deleteDeck(String id) => localDataSource.deleteDeck(id);
 
   @override

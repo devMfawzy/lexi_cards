@@ -52,10 +52,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newDeckTitle => 'New deck';
 
   @override
+  String get renameDeckTitle => 'Rename deck';
+
+  @override
   String get deckNameLabel => 'Deck name';
 
   @override
   String get create => 'Create';
+
+  @override
+  String get browseCards => 'Browse cards';
 
   @override
   String get deleteDeckTitle => 'Delete deck?';

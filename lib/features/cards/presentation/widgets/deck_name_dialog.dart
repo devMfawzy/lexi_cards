@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 
-class CreateDeckDialog extends StatefulWidget {
-  const CreateDeckDialog({super.key});
+/// Prompts for a deck name — used both to create a new deck and to rename
+/// an existing one, distinguished by whether [initialName] is set.
+class DeckNameDialog extends StatefulWidget {
+  final String? initialName;
+
+  const DeckNameDialog({super.key, this.initialName});
 
   @override
-  State<CreateDeckDialog> createState() => _CreateDeckDialogState();
+  State<DeckNameDialog> createState() => _DeckNameDialogState();
 }
 
-class _CreateDeckDialogState extends State<CreateDeckDialog> {
-  final _nameController = TextEditingController();
+class _DeckNameDialogState extends State<DeckNameDialog> {
+  late final _nameController = TextEditingController(text: widget.initialName);
 
   @override
   void dispose() {
@@ -20,8 +24,9 @@ class _CreateDeckDialogState extends State<CreateDeckDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final isRename = widget.initialName != null;
     return AlertDialog(
-      title: Text(l10n.newDeckTitle),
+      title: Text(isRename ? l10n.renameDeckTitle : l10n.newDeckTitle),
       content: TextField(
         controller: _nameController,
         decoration: InputDecoration(labelText: l10n.deckNameLabel),
@@ -38,7 +43,7 @@ class _CreateDeckDialogState extends State<CreateDeckDialog> {
             if (name.isEmpty) return;
             Navigator.of(context).pop(name);
           },
-          child: Text(l10n.create),
+          child: Text(isRename ? l10n.save : l10n.create),
         ),
       ],
     );

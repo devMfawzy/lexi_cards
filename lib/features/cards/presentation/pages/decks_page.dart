@@ -6,8 +6,8 @@ import '../../../../core/widgets/empty_state.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../bloc/decks_cubit.dart';
 import '../bloc/decks_state.dart';
-import '../widgets/create_deck_dialog.dart';
 import '../widgets/deck_list_tile.dart';
+import '../widgets/deck_name_dialog.dart';
 
 class DecksPage extends StatelessWidget {
   const DecksPage({super.key});
@@ -18,6 +18,7 @@ class DecksPage extends StatelessWidget {
       create: (_) => DecksCubit(
         getDecks: getIt(),
         createDeckUseCase: getIt(),
+        renameDeckUseCase: getIt(),
         deleteDeckUseCase: getIt(),
         getCards: getIt(),
       )..loadDecks(),
@@ -84,6 +85,7 @@ class _DecksView extends StatelessWidget {
                   summary: summary,
                   onTap: () => context.push('/decks/${summary.deck.id}'),
                   onStudy: () => context.push('/decks/${summary.deck.id}/review'),
+                  onRename: (name) => context.read<DecksCubit>().renameDeck(summary.deck.id, name),
                   onDelete: () => context.read<DecksCubit>().deleteDeck(summary.deck.id),
                 );
               },
@@ -96,7 +98,7 @@ class _DecksView extends StatelessWidget {
           final cubit = context.read<DecksCubit>();
           final name = await showDialog<String>(
             context: context,
-            builder: (_) => const CreateDeckDialog(),
+            builder: (_) => const DeckNameDialog(),
           );
           if (name != null) {
             cubit.createDeck(name);

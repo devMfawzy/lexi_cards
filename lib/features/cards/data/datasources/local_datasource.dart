@@ -5,6 +5,7 @@ import '../models/review_log_model.dart';
 
 abstract class LocalDataSource {
   Future<List<DeckModel>> getDecks();
+  Future<DeckModel?> getDeck(String id);
   Future<DeckModel> saveDeck(DeckModel model);
   Future<void> deleteDeck(String id);
 
@@ -33,6 +34,12 @@ class LocalDataSourceImpl implements LocalDataSource {
   Future<List<DeckModel>> getDecks() async {
     final box = await _decks;
     return box.values.toList();
+  }
+
+  @override
+  Future<DeckModel?> getDeck(String id) async {
+    final box = await _decks;
+    return box.get(id);
   }
 
   @override

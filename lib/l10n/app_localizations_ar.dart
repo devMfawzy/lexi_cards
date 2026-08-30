@@ -52,10 +52,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get newDeckTitle => 'مجموعة جديدة';
 
   @override
+  String get renameDeckTitle => 'إعادة تسمية المجموعة';
+
+  @override
   String get deckNameLabel => 'اسم المجموعة';
 
   @override
   String get create => 'إنشاء';
+
+  @override
+  String get browseCards => 'تصفح البطاقات';
 
   @override
   String get deleteDeckTitle => 'حذف المجموعة؟';

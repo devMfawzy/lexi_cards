@@ -176,7 +176,13 @@ abstract class AppLocalizations {
   /// **'New deck'**
   String get newDeckTitle;
 
-  /// Text field label in the create-deck dialog
+  /// Title of the rename-deck dialog, and the rename action in a deck's long-press menu
+  ///
+  /// In en, this message translates to:
+  /// **'Rename deck'**
+  String get renameDeckTitle;
+
+  /// Text field label in the create/rename-deck dialog
   ///
   /// In en, this message translates to:
   /// **'Deck name'**
@@ -187,6 +193,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create'**
   String get create;
+
+  /// Action in a deck's long-press menu: open its card list
+  ///
+  /// In en, this message translates to:
+  /// **'Browse cards'**
+  String get browseCards;
 
   /// Title of the delete-deck confirmation dialog
   ///
