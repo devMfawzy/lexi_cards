@@ -4,6 +4,13 @@ A spaced-repetition flashcard app, Anki-style, built in Flutter. You create deck
 
 I built this as a portfolio piece to show a complete, non-trivial Flutter app: clean architecture, BLoC state management, local persistence, and a scheduling algorithm with actual logic worth unit testing — not just CRUD screens.
 
+<p>
+  <img src="screenshots/decks.jpg" width="200" alt="My Decks screen">
+  <img src="screenshots/cards.jpg" width="200" alt="Card list with rich text and an image card">
+  <img src="screenshots/review.png" width="200" alt="Review session, answer revealed">
+  <img src="screenshots/stats.png" width="200" alt="Stats screen with streaks and 7-day charts">
+</p>
+
 ## What's in it
 
 - **Decks & cards** — create decks, add/edit/delete cards. Front and back support rich text (bold, italic, underline, color) via a curated Quill toolbar, Anki-style, plus inline images (gallery, camera, or a pasted link) stored as base64 data URIs inline in the same field — no separate media store.
