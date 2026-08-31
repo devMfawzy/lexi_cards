@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:image/image.dart' as img;
 
 /// Cards store front/back as Quill Delta JSON. These helpers convert between
 /// that stored string and a [Document], falling back to treating the raw
@@ -86,13 +88,70 @@ String mimeTypeForPath(String path) {
 String dataUriFromBytes(Uint8List bytes, {required String mimeType}) =>
     'data:$mimeType;base64,${base64Encode(bytes)}';
 
+/// Longest-side cap for an embedded image. Cards are viewed on a phone
+/// screen, so there's no reason to keep a multi-megapixel camera photo
+/// around — this alone is usually what shrinks a multi-MB original down to a
+/// few hundred KB before it's ever base64-inlined into the Hive box.
+const _maxImageDimension = 1600;
+const _jpegQuality = 82;
+
+/// Decodes, resizes, and re-encodes a picked image. Runs off the UI thread
+/// via [compute] — decode/resize/encode on a full-resolution camera photo is
+/// real CPU work that would otherwise jank the image-picker flow.
+///
+/// Takes and returns a (bytes, mimeType) pair rather than a plain
+/// [Uint8List] because compression can change the format (a re-encoded
+/// opaque PNG becomes a smaller JPEG), so the mime type has to travel with
+/// the bytes it actually describes.
+(Uint8List, String) _resizeAndCompress((Uint8List, String) original) {
+  final (bytes, mimeType) = original;
+  try {
+    final decoded = img.decodeImage(bytes);
+    // Unrecognized/undecodable format (e.g. HEIC — the `image` package
+    // doesn't decode it) — embed the original bytes unchanged rather than fail.
+    if (decoded == null) return original;
+
+    final longestSide = decoded.width > decoded.height ? decoded.width : decoded.height;
+    final resized = longestSide > _maxImageDimension
+        ? img.copyResize(
+            decoded,
+            width: decoded.width >= decoded.height ? _maxImageDimension : null,
+            height: decoded.height > decoded.width ? _maxImageDimension : null,
+            interpolation: img.Interpolation.average,
+          )
+        : decoded;
+
+    // Keep transparency (PNG) if the source has any; otherwise JPEG
+    // compresses a photo far smaller than PNG ever would.
+    final hasAlpha = resized.hasAlpha;
+    final encoded = hasAlpha
+        ? img.encodePng(resized)
+        : img.encodeJpg(resized, quality: _jpegQuality);
+
+    // Re-encoding isn't guaranteed to win against an already-small/optimized
+    // original (e.g. a small icon-sized PNG) — only use it if it actually did.
+    if (encoded.length >= bytes.length) return original;
+    return (encoded, hasAlpha ? 'image/png' : 'image/jpeg');
+  } catch (_) {
+    // A malformed/truncated/unsupported input can throw partway through
+    // decoding rather than returning null — embed the original unchanged
+    // rather than lose the picked image entirely.
+    return original;
+  }
+}
+
 /// Converts a picked image's source into what gets embedded in the Delta.
 /// A remote link (the toolbar's "Link" option) is inserted as-is; a local
-/// file (gallery/camera) is read and inlined as a base64 data URI.
+/// file (gallery/camera) is resized/compressed and inlined as a base64 data
+/// URI.
 Future<String> imageEmbedSourceFor(String pickedPathOrUrl) async {
   if (pickedPathOrUrl.startsWith('http://') || pickedPathOrUrl.startsWith('https://')) {
     return pickedPathOrUrl;
   }
-  final bytes = await File(pickedPathOrUrl).readAsBytes();
-  return dataUriFromBytes(bytes, mimeType: mimeTypeForPath(pickedPathOrUrl));
+  final originalBytes = await File(pickedPathOrUrl).readAsBytes();
+  final (bytes, mimeType) = await compute(
+    _resizeAndCompress,
+    (originalBytes, mimeTypeForPath(pickedPathOrUrl)),
+  );
+  return dataUriFromBytes(bytes, mimeType: mimeType);
 }

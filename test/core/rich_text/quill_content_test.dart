@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image/image.dart' as img;
 import 'package:lexi_cards/core/rich_text/quill_content.dart';
 
 void main() {
@@ -152,6 +154,71 @@ void main() {
         final source = await imageEmbedSourceFor(file.path);
         expect(source, startsWith('data:image/png;base64,'));
         expect(base64Decode(source.split(',').last), bytes);
+      } finally {
+        await file.delete();
+      }
+    });
+
+    test('downsizes an oversized opaque image and re-encodes it as jpeg', () async {
+      // Noisy per-pixel content rather than a flat fill — a solid color
+      // compresses so well as PNG that a downscaled/recompressed JPEG can't
+      // beat it, which isn't representative of an actual photo.
+      final original = img.Image(width: 2000, height: 1000); // 2:1, no alpha
+      final random = Random(42);
+      for (var y = 0; y < original.height; y++) {
+        for (var x = 0; x < original.width; x++) {
+          original.setPixelRgb(x, y, random.nextInt(256), random.nextInt(256), random.nextInt(256));
+        }
+      }
+      final file = await File(
+        '${Directory.systemTemp.path}/quill_content_test_${DateTime.now().microsecondsSinceEpoch}.png',
+      ).writeAsBytes(img.encodePng(original));
+
+      try {
+        final source = await imageEmbedSourceFor(file.path);
+        expect(source, startsWith('data:image/jpeg;base64,'));
+
+        final decodedBytes = base64Decode(source.split(',').last);
+        expect(decodedBytes.length, lessThan(await file.length()));
+
+        final resized = img.decodeImage(decodedBytes)!;
+        expect(resized.width, 1600);
+        expect(resized.height, 800); // aspect ratio preserved
+      } finally {
+        await file.delete();
+      }
+    });
+
+    test('downsizes an oversized transparent image but keeps it as png', () async {
+      final original = img.Image(width: 3000, height: 1500, numChannels: 4);
+      final file = await File(
+        '${Directory.systemTemp.path}/quill_content_test_${DateTime.now().microsecondsSinceEpoch}.png',
+      ).writeAsBytes(img.encodePng(original));
+
+      try {
+        final source = await imageEmbedSourceFor(file.path);
+        expect(source, startsWith('data:image/png;base64,'));
+
+        final resized = img.decodeImage(base64Decode(source.split(',').last))!;
+        expect(resized.width, 1600);
+        expect(resized.height, 800);
+        expect(resized.hasAlpha, isTrue);
+      } finally {
+        await file.delete();
+      }
+    });
+
+    test('leaves an already-small image alone rather than risk making it bigger', () async {
+      final original = img.Image(width: 40, height: 40);
+      final originalBytes = img.encodePng(original);
+      final file = await File(
+        '${Directory.systemTemp.path}/quill_content_test_${DateTime.now().microsecondsSinceEpoch}.png',
+      ).writeAsBytes(originalBytes);
+
+      try {
+        final source = await imageEmbedSourceFor(file.path);
+        final decodedBytes = base64Decode(source.split(',').last);
+        expect(decodedBytes.length, lessThanOrEqualTo(originalBytes.length));
       } finally {
         await file.delete();
       }
