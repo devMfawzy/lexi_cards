@@ -75,7 +75,7 @@ class CardListTile extends StatelessWidget {
       confirmDismiss: (_) => _confirmDelete(context, l10n),
       onDismissed: (_) => onDelete(),
       background: Container(
-        alignment: Alignment.centerRight,
+        alignment: AlignmentDirectional.centerEnd,
         padding: const EdgeInsets.symmetric(horizontal: 24),
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
@@ -91,7 +91,7 @@ class CardListTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
+              padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 16, 16),
               child: Row(
                 children: [
                   Container(width: 4, height: 40, decoration: BoxDecoration(

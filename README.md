@@ -46,6 +46,8 @@ Two Flutter helper functions couldn't reach `AppLocalizations` because they have
 
 Localization also surfaced a real, non-cosmetic bug: Unicode's bidi algorithm reorders tightly-packed digit content once it's embedded in an Arabic paragraph — a progress counter reading "0 / 1" rendered as "1 / 0", because digits and neutral characters like "/" have no inherent direction of their own and inherit the surrounding RTL context. `core/widgets/ltr_text.dart` (`LtrText`) fixes it narrowly: it forces LTR bidi resolution for that text's own characters while keeping `textAlign` tied to the ambient direction, so the fix doesn't shift where the text sits in an otherwise-mirrored RTL layout.
 
+A follow-up pass audited every fixed-direction layout value in the app (`EdgeInsets.fromLTRB`/`.only`, `Alignment.centerLeft`/`centerRight`, directional icons) against how Flutter actually resolves them under RTL — `Row`/`Column`/`GridView` and `MainAxisAlignment`/`CrossAxisAlignment` already auto-mirror and needed nothing. Two real gaps did not: the swipe-to-delete icon in `deck_list_tile.dart`/`card_list_tile.dart` was pinned to `Alignment.centerRight` inside the `Dismissible` background, so in Arabic it rendered on the wrong edge of the (correctly, automatically mirrored) reveal area — fixed to `AlignmentDirectional.centerEnd`. And the same two tiles' content padding used literal `EdgeInsets.fromLTRB` with an intentionally asymmetric left/right split (more space before the text than after the icon) that doesn't mirror on its own — fixed to `EdgeInsetsDirectional.fromSTEB` so the asymmetry follows reading direction instead of staying pinned to physical sides.
+
 Wiring:
 - `get_it` for DI (registered in `core/di/injection_container.dart`)
 - `go_router` for navigation (`core/router/app_router.dart`)
@@ -90,7 +92,7 @@ The parts with actual logic worth testing, and all are covered:
 
 ## What's not here yet
 
-No sync — it's local-only. Arabic RTL relies on Flutter's automatic `Directionality` mirroring rather than a pixel-perfect audit of every fixed padding/alignment value — no known issues, but not exhaustively checked either. These are the obvious next steps if this grows past a portfolio piece.
+No sync — it's local-only. The obvious next step if this grows past a portfolio piece.
 
 ## Author
 

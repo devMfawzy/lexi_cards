@@ -128,7 +128,7 @@ class _StudyAllHeader extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 12, 16),
+            padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 12, 16),
             child: Row(
               children: [
                 Expanded(

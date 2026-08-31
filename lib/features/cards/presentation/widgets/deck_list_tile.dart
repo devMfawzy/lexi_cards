@@ -96,7 +96,7 @@ class DeckListTile extends StatelessWidget {
       confirmDismiss: (_) => _confirmDelete(context, l10n),
       onDismissed: (_) => onDelete(),
       background: Container(
-        alignment: Alignment.centerRight,
+        alignment: AlignmentDirectional.centerEnd,
         padding: const EdgeInsets.symmetric(horizontal: 24),
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
@@ -113,7 +113,7 @@ class DeckListTile extends StatelessWidget {
             onTap: onTap,
             onLongPress: () => _showActions(context, l10n),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 12, 16),
+              padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 12, 16),
               child: Row(
                 children: [
                   Expanded(
