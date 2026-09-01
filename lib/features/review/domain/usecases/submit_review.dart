@@ -25,7 +25,7 @@ class SubmitReview {
       reviewCount: result.newReviewCount,
     );
 
-    await repository.updateCard(updated);
+    await repository.updateCardSchedule(updated);
     await repository.addReviewLog(ReviewLog(
       id: _uuid.v4(),
       cardId: cardId,

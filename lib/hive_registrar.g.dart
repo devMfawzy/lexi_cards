@@ -6,12 +6,14 @@ import 'package:hive_ce/hive_ce.dart';
 import 'package:lexi_cards/features/cards/data/models/deck_model.dart';
 import 'package:lexi_cards/features/cards/data/models/flashcard_model.dart';
 import 'package:lexi_cards/features/cards/data/models/review_log_model.dart';
+import 'package:lexi_cards/features/cards/data/models/tombstone_model.dart';
 
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
     registerAdapter(DeckModelAdapter());
     registerAdapter(FlashcardModelAdapter());
     registerAdapter(ReviewLogModelAdapter());
+    registerAdapter(TombstoneModelAdapter());
   }
 }
 
@@ -20,5 +22,6 @@ extension IsolatedHiveRegistrar on IsolatedHiveInterface {
     registerAdapter(DeckModelAdapter());
     registerAdapter(FlashcardModelAdapter());
     registerAdapter(ReviewLogModelAdapter());
+    registerAdapter(TombstoneModelAdapter());
   }
 }

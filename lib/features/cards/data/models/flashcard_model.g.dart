@@ -28,13 +28,15 @@ class FlashcardModelAdapter extends TypeAdapter<FlashcardModel> {
       ..easeFactor = (fields[8] as num).toDouble()
       ..learningStepIndex = (fields[9] as num).toInt()
       ..lapses = (fields[10] as num).toInt()
-      ..reviewCount = (fields[11] as num).toInt();
+      ..reviewCount = (fields[11] as num).toInt()
+      ..contentUpdatedAtMs = (fields[12] as num?)?.toInt()
+      ..scheduleUpdatedAtMs = (fields[13] as num?)?.toInt();
   }
 
   @override
   void write(BinaryWriter writer, FlashcardModel obj) {
     writer
-      ..writeByte(12)
+      ..writeByte(14)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -58,7 +60,11 @@ class FlashcardModelAdapter extends TypeAdapter<FlashcardModel> {
       ..writeByte(10)
       ..write(obj.lapses)
       ..writeByte(11)
-      ..write(obj.reviewCount);
+      ..write(obj.reviewCount)
+      ..writeByte(12)
+      ..write(obj.contentUpdatedAtMs)
+      ..writeByte(13)
+      ..write(obj.scheduleUpdatedAtMs);
   }
 
   @override

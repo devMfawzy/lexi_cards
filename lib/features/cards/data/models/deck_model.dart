@@ -14,6 +14,13 @@ class DeckModel extends HiveObject {
   @HiveField(2)
   late DateTime createdAt;
 
+  /// When this deck was last renamed, as epoch milliseconds. See
+  /// [FlashcardModel.contentUpdatedAtMs] for why this is nullable, stored as
+  /// an int, and kept off the domain entity. A deck has no scheduling state,
+  /// so it needs only the one clock.
+  @HiveField(3)
+  int? contentUpdatedAtMs;
+
   Deck toEntity() => Deck(
         id: id,
         name: name,

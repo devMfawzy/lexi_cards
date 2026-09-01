@@ -29,16 +29,23 @@ class CardRepositoryImpl implements CardRepository {
       ..id = _uuid.v4()
       ..name = name
       ..createdAt = DateTime.now();
-    final saved = await localDataSource.saveDeck(model);
+    final saved = await localDataSource.saveDeck(model, kind: WriteKind.content);
     return saved.toEntity();
   }
 
   @override
   Future<Deck> renameDeck(String id, String name) async {
-    final model = await localDataSource.getDeck(id);
-    if (model == null) throw Exception('Deck not found: $id');
-    model.name = name;
-    final saved = await localDataSource.saveDeck(model);
+    final existing = await localDataSource.getDeck(id);
+    if (existing == null) throw Exception('Deck not found: $id');
+    // Build a fresh model rather than mutating in place: `getDeck` hands back
+    // the box's own live instance, so assigning to it changes what every other
+    // reader sees before (and whether or not) the write actually lands.
+    final model = DeckModel()
+      ..id = existing.id
+      ..name = name
+      ..createdAt = existing.createdAt
+      ..contentUpdatedAtMs = existing.contentUpdatedAtMs;
+    final saved = await localDataSource.saveDeck(model, kind: WriteKind.content);
     return saved.toEntity();
   }
 
@@ -68,7 +75,10 @@ class CardRepositoryImpl implements CardRepository {
       back: back,
       createdAt: now,
     );
-    final saved = await localDataSource.saveCard(FlashcardModel.fromEntity(card));
+    final saved = await localDataSource.saveCard(
+      FlashcardModel.fromEntity(card),
+      kind: WriteKind.content,
+    );
     return saved.toEntity();
   }
 
@@ -77,7 +87,18 @@ class CardRepositoryImpl implements CardRepository {
 
   @override
   Future<void> updateCard(Flashcard card) async {
-    await localDataSource.saveCard(FlashcardModel.fromEntity(card));
+    await localDataSource.saveCard(
+      FlashcardModel.fromEntity(card),
+      kind: WriteKind.content,
+    );
+  }
+
+  @override
+  Future<void> updateCardSchedule(Flashcard card) async {
+    await localDataSource.saveCard(
+      FlashcardModel.fromEntity(card),
+      kind: WriteKind.schedule,
+    );
   }
 
   @override
