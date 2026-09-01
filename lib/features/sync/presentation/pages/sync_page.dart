@@ -108,28 +108,35 @@ class _SyncView extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Card(
-                child: Column(
-                  children: [
-                    ListTile(
-                      title: Text(l10n.syncAccountLabel),
-                      subtitle: Text(state.accountEmail ?? l10n.syncNotConnected),
-                    ),
-                    if (state.isLinked)
-                      ListTile(
-                        title: Text(
-                          state.lastSyncedAt == null
-                              ? l10n.syncNever
-                              : l10n.syncLastSynced(
-                                  DateFormat.yMMMd(
-                                    Localizations.localeOf(context).toString(),
-                                  ).add_jm().format(state.lastSyncedAt!),
+                // One row rather than two: the account and when it last synced
+                // are a single fact about the connection, and stacking them as
+                // separate list tiles left a gap that read as a missing item.
+                child: ListTile(
+                  title: Text(l10n.syncAccountLabel),
+                  isThreeLine: state.isLinked,
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(state.accountEmail ?? l10n.syncNotConnected),
+                      if (state.isLinked)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(
+                            state.lastSyncedAt == null
+                                ? l10n.syncNever
+                                : l10n.syncLastSynced(
+                                    DateFormat.yMMMd(
+                                      Localizations.localeOf(context).toString(),
+                                    ).add_jm().format(state.lastSyncedAt!),
+                                  ),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
                                 ),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
+                          ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 16),

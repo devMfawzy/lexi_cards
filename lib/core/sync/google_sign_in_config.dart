@@ -13,7 +13,8 @@ class GoogleSignInConfig {
       '940126843930-c2qfkp36s59pcrh1qu4950o1bvc5vr4h.apps.googleusercontent.com';
 
   /// Android needs the *web* client ID here, as `serverClientId`, even though
-  /// nothing in this app has a server. Sign-in on Android will fail with a
-  /// clear error until it's filled in; iOS is unaffected.
-  static const androidServerClientId = null;
+  /// nothing in this app has a server — it's how Google Play Services
+  /// identifies the app during sign-in. iOS ignores it.
+  static const androidServerClientId =
+      '940126843930-i9i27tmikk1jltmlglq88hoav8t5umtm.apps.googleusercontent.com';
 }

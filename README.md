@@ -18,6 +18,7 @@ I built this as a portfolio piece to show a complete, non-trivial Flutter app: c
 - **SM-2 scheduling** — new cards go through short learning steps (1m → 10m) before graduating into day-scale review intervals. Ease factor adjusts per rating, lapses send a card back to relearning. Config lives in one place (`sm2_config.dart`) so the constants aren't scattered through the scheduler.
 - **Stats screen** — every review was already being logged (`ReviewLog`: rating, interval before/after, ease before/after) but nothing surfaced it. Added a screen for current/longest streak, retention rate, and 7-day bar charts for reviews done vs. cards coming due.
 - **Daily reminders** — an opt-in local notification nudging you back to review, set from a new Settings screen (gear icon). Deliberately scoped to one recurring daily notification rather than per-card/per-due-date scheduling — iOS caps pending local notifications at 64, and rescheduling on every review is a lot of complexity for little gain over a daily nudge. Permission is requested in-context when you flip the toggle, not at cold start.
+- **Two-way sync** — link a Google account from Settings and your decks, cards, scheduling and review history stay in step across devices. Storage is the user's own Drive, in the hidden per-app folder, so there is no backend to run and this app can never see another file in their Drive. Not backup-and-restore: two devices that both changed things are genuinely merged, per record.
 - **Localization** — English and Arabic (RTL), switchable from Settings with a "System default" option that follows the device language. Built on Flutter's official `flutter gen-l10n`/ARB toolchain rather than a one-off string swap, so adding a third language later is just dropping in another ARB file. Weekday abbreviations use `intl`'s CLDR data (`DateFormat.E(locale)`) instead of a hand-maintained translation.
 
 ## Architecture
@@ -50,6 +51,20 @@ Localization also surfaced a real, non-cosmetic bug: Unicode's bidi algorithm re
 
 A follow-up pass audited every fixed-direction layout value in the app (`EdgeInsets.fromLTRB`/`.only`, `Alignment.centerLeft`/`centerRight`, directional icons) against how Flutter actually resolves them under RTL — `Row`/`Column`/`GridView` and `MainAxisAlignment`/`CrossAxisAlignment` already auto-mirror and needed nothing. Two real gaps did not: the swipe-to-delete icon in `deck_list_tile.dart`/`card_list_tile.dart` was pinned to `Alignment.centerRight` inside the `Dismissible` background, so in Arabic it rendered on the wrong edge of the (correctly, automatically mirrored) reveal area — fixed to `AlignmentDirectional.centerEnd`. And the same two tiles' content padding used literal `EdgeInsets.fromLTRB` with an intentionally asymmetric left/right split (more space before the text than after the icon) that doesn't mirror on its own — fixed to `EdgeInsetsDirectional.fromSTEB` so the asymmetry follows reading direction instead of staying pinned to physical sides.
 
+Sync is the largest piece of design here, because the cloud does none of the work. Drive is a blob store: it holds one gzipped file and reports whether it changed. Every decision about what the data *should* be is ours, which means it's pure Dart with no I/O — and by far the most heavily tested code in the app.
+
+The interesting problem is that plain last-write-wins destroys data here. Review a card on your phone, fix a typo in it on your tablet, and a single `updatedAt` per record forces the merge to discard one of them: either the review is silently rolled back, or the typo fix is silently reverted. So a card carries **two independent clocks**, content and scheduling, resolved separately and each moved as a whole — never field by field, since taking `intervalDays` from one side and `easeFactor` from the other invents states the scheduler never produces.
+
+Scheduling is ordered by `reviewCount` before any timestamp. The scheduler already increments it exactly once per review, which makes it a logical clock the app maintains for free — and one a wrong device clock can't corrupt. That matters, because a user setting their clock forward to skip a due date is ordinary behaviour in a spaced-repetition app, not an attack.
+
+Deletion needs a trace or it doesn't survive: without tombstones, a card deleted on one device simply returns from the other. Deleting a deck records *one* tombstone for the deck rather than one per card, and card removal is derived from it — otherwise a card edited concurrently elsewhere outlives its own deck and becomes unreachable, appearing on no deck's page while still being served by "study all decks" and counted in the stats. Tombstones are never aged out, since dropping them after any window lets a device that was offline longer resurrect everything it deleted.
+
+Review logs merge by plain union — immutable and append-only, so they can't conflict. That's the redeeming property of a scheduling clash: the card takes one side's schedule, but *neither* review is lost, so streaks and retention stay complete.
+
+Two details that look like nits and aren't. Every timestamp crosses the wire as an integer of epoch milliseconds, because `toIso8601String()` on a local time carries no offset and the receiving device reparses it in its own zone — which means syncing twice with no edits keeps changing the data, and merge stops being idempotent. And enums travel by name, not by index, so reordering one doesn't silently reinterpret every stored card.
+
+`core/sync/cloud_storage.dart` is an interface rather than the concrete-class-with-an-injected-plugin shape `NotificationService` uses, because there is real polymorphism here and not just a seam for tests — the system file picker and iCloud are both plausible second implementations. Uploads are conditional on the revision the merge was based on, so two devices syncing at once can't silently overwrite each other; Drive has no conditional write, so this compares the version seen a moment earlier and is documented as best-effort rather than atomic.
+
 Wiring:
 - `get_it` for DI (registered in `core/di/injection_container.dart`)
 - `go_router` for navigation (`core/router/app_router.dart`)
@@ -63,6 +78,7 @@ Wiring:
 - `flutter_quill` + `flutter_quill_extensions` for rich text and inline images; `image` (pure Dart, no native/platform setup) to resize/recompress a picked image before it's inlined
 - `flutter_local_notifications` + `timezone` + `flutter_timezone` for the daily reminder; `shared_preferences` for its settings (not worth a Hive box for two scalars)
 - `flutter_localizations` (SDK) + `intl` for localization, via `flutter gen-l10n`
+- `google_sign_in` + `googleapis` (Drive v3) + `extension_google_sign_in_as_googleapis_auth` for sync. Setting up the OAuth clients is a one-time developer step, written up in [`docs/google-cloud-setup.md`](docs/google-cloud-setup.md)
 - `go_router`, `get_it`, `uuid`
 - `mocktail` + `bloc_test` for tests
 
@@ -91,10 +107,17 @@ The parts with actual logic worth testing, and all are covered:
 - `settings_cubit_test.dart` — enabling only schedules on permission grant (denial leaves it off with an error), disabling cancels, changing the time reschedules only while enabled.
 - `settings_repository_impl_test.dart` — round-trips through `SharedPreferences.setMockInitialValues`, including the persisted language code.
 - `locale_cubit_test.dart` — loading the persisted locale (or none, following system default) and persisting a new one on change.
+- `merge_snapshots_test.dart` — the biggest suite, and the one worth reading. Beyond the per-rule cases it asserts the *algebraic* properties, which are what catch design errors rather than typos: merging a snapshot with itself is a no-op, merging A into B equals merging B into A, merging twice changes nothing the second time, the result doesn't depend on the current time, `reviewCount` never decreases, and no surviving card references a deck that didn't survive. Plus the two cases the two-clock design exists for — a content edit not rolling back a newer review, and a review not reverting a newer edit.
+- `sync_snapshot_codec_test.dart` — round-tripping, timestamps surviving between devices in different timezones, unknown enum values from a newer schema falling back rather than throwing, a newer schema version refused outright, and truncated or non-gzip payloads failing loudly instead of half-decoding.
+- `sync_repository_impl_test.dart` — the whole pipeline end to end against a fake cloud: Hive to records to merge to gzip and back. Deletions travelling both directions, tombstone times surviving apply un-restamped, an upload clash retrying against the newer copy, and a local review surviving a content edit made elsewhere.
+- `adapter_migration_test.dart` — reads a frame that is genuinely *missing* the fields added for sync, rather than one storing them as null. Writing with the current adapter and reading it straight back would pass even if those fields were non-nullable, and the failure that hides lands inside `Hive.openBox` — the deck list would throw on launch for everyone with existing data.
+- `local_datasource_test.dart` — that a content edit doesn't erase the record of when a card was last reviewed, that deleting a deck records one tombstone rather than one per card, and that deleting a card keeps its review logs.
 
 ## What's not here yet
 
-No sync — it's local-only. The obvious next step if this grows past a portfolio piece.
+Sync uploads the whole snapshot every time rather than only what changed, which is fine for a text-heavy deck and wasteful for one full of photos. Each record already carries a content hash, so the upgrade — a small manifest plus content-addressed blobs, fetching only the images it doesn't have — is a schema-compatible addition that leaves the merge algorithm untouched. That separation is the reason to keep the transport dumb.
+
+Two smaller things follow from the same design. Merging holds the local copy, the remote copy and the result in memory at once, so a very large photo deck is bounded by memory before it's bounded by bandwidth. And conflicts between *content edits* still resolve by wall clock, so two devices editing the same card's text within a badly skewed clock window can resolve the "wrong" way — scheduling sidesteps this entirely via `reviewCount`, but text has no equivalent logical clock. Vector clocks would fix it and are overkill for one person's own devices.
 
 ## Author
 
