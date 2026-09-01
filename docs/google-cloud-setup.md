@@ -48,8 +48,11 @@ Order matters: the consent screen must exist before any client can be created.
    - User type: **External**
    - App name: `Lexi Cards`, plus your support and developer email
    - Add scope: `https://www.googleapis.com/auth/drive.appdata`
-   - Test users: add your own Google account
+   - Test users: **add every account you'll sign in with**, including your own
    - Leave it in **Testing** — up to 100 test users, and no publishing flow to deal with.
+
+   Skipping the test-user step produces a confusing failure at sign-in; see
+   *Access blocked* below.
 
 4. **iOS client** — *Credentials → Create Credentials → OAuth client ID* → **iOS**.
    Bundle ID: `com.devmfawzy.lexiCards`.
@@ -77,6 +80,22 @@ Order matters: the consent screen must exist before any client can be created.
 
 The Android client ID isn't referenced anywhere in code — Google matches it by package
 name and signing fingerprint at sign-in time.
+
+## Troubleshooting
+
+### "Access blocked: Lexi Cards has not completed the Google verification process"
+
+Ignore the headline — it is wrong for this app. Verification is only required for
+sensitive scopes, and `drive.appdata` is not one. The accurate part is the sentence
+underneath: *"can only be accessed by developer-approved testers."*
+
+The app is in Testing mode and the account signing in isn't on the test-user list. Either:
+
+- **Add the account** — *Google Auth Platform → Audience → Test users → + Add users*.
+  Takes a minute or two to propagate.
+- **Or publish the app** — same page, **Publish app**. For a non-sensitive scope this
+  needs no review and removes the 100-user limit entirely. This is the reason the hidden
+  app-data folder was worth choosing over a broader Drive scope.
 
 ## Two things to know
 
