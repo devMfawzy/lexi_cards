@@ -159,5 +159,46 @@
   "languageEnglish": "English",
   "@languageEnglish": {"description": "Language picker option"},
   "languageArabic": "العربية",
-  "@languageArabic": {"description": "Language picker option, shown in its own script (Arabic endonym)"}
+  "@languageArabic": {"description": "Language picker option, shown in its own script (Arabic endonym)"},
+
+  "syncTitle": "Sync",
+  "@syncTitle": {"description": "Row label in Settings, and the title of the sync screen"},
+  "syncNotConnected": "Not connected",
+  "@syncNotConnected": {"description": "Shown next to the Sync row when no account is linked"},
+  "syncExplainer": "Your decks and progress are kept in a private folder in your Google Drive. Lexi Cards can't see any other file there.",
+  "@syncExplainer": {"description": "Explains what syncing does and what the app can access"},
+  "syncConnectAccount": "Connect Google account",
+  "@syncConnectAccount": {"description": "Button that starts the Google sign-in flow"},
+  "syncDisconnect": "Disconnect",
+  "@syncDisconnect": {"description": "Button that unlinks the connected Google account"},
+  "syncNow": "Sync now",
+  "@syncNow": {"description": "Button that runs a sync immediately"},
+  "syncAccountLabel": "Account",
+  "@syncAccountLabel": {"description": "Row label above the connected account's email address"},
+  "syncLastSynced": "Last synced {time}",
+  "@syncLastSynced": {
+    "description": "Shows when the last successful sync happened",
+    "placeholders": {"time": {"type": "String"}}
+  },
+  "syncNever": "Not synced yet",
+  "@syncNever": {"description": "Shown in place of a last-synced time before the first sync"},
+  "syncUninstallWarning": "Removing Lexi Cards from your Google Drive deletes this copy. It keeps your devices in step — it isn't a permanent backup.",
+  "@syncUninstallWarning": {"description": "Warns that the Drive app-data folder is deleted when the user removes the app from Drive"},
+  "syncConnected": "Account connected.",
+  "@syncConnected": {"description": "Confirmation after linking a Google account"},
+  "syncDisconnected": "Account disconnected.",
+  "@syncDisconnected": {"description": "Confirmation after unlinking a Google account"},
+  "syncUpToDate": "Already up to date.",
+  "@syncUpToDate": {"description": "Shown after a sync that found nothing new on either side"},
+  "syncChangesApplied": "{count, plural, one{Synced — 1 change} other{Synced — {count} changes}}",
+  "@syncChangesApplied": {
+    "description": "Shown after a sync that changed something, with the number of records added, updated or removed",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "syncNeedsAccount": "Connect a Google account first.",
+  "@syncNeedsAccount": {"description": "Shown when a sync is attempted with no linked account"},
+  "syncRemoteBusy": "Another device is syncing right now. Try again in a moment.",
+  "@syncRemoteBusy": {"description": "Shown when the cloud copy kept changing during the sync"},
+  "syncSnapshotTooNew": "This data was synced by a newer version of Lexi Cards. Update the app to continue syncing.",
+  "@syncSnapshotTooNew": {"description": "Shown when the cloud copy uses a schema version this build cannot read"}
 }

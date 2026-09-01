@@ -30,6 +30,22 @@
 	<string>Used to add a picture to a flashcard.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Used to take a picture to add to a flashcard.</string>
+	<key>GIDClientID</key>
+	<string>940126843930-c2qfkp36s59pcrh1qu4950o1bvc5vr4h.apps.googleusercontent.com</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<!-- The iOS client ID reversed. Google's sign-in sheet returns to
+				     the app through this scheme, which is what makes linking an
+				     account a single tap with nothing to copy. -->
+				<string>com.googleusercontent.apps.940126843930-c2qfkp36s59pcrh1qu4950o1bvc5vr4h</string>
+			</array>
+		</dict>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

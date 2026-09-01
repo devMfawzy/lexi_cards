@@ -228,4 +228,69 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get languageArabic => 'العربية';
+
+  @override
+  String get syncTitle => 'Sync';
+
+  @override
+  String get syncNotConnected => 'Not connected';
+
+  @override
+  String get syncExplainer =>
+      'Your decks and progress are kept in a private folder in your Google Drive. Lexi Cards can\'t see any other file there.';
+
+  @override
+  String get syncConnectAccount => 'Connect Google account';
+
+  @override
+  String get syncDisconnect => 'Disconnect';
+
+  @override
+  String get syncNow => 'Sync now';
+
+  @override
+  String get syncAccountLabel => 'Account';
+
+  @override
+  String syncLastSynced(String time) {
+    return 'Last synced $time';
+  }
+
+  @override
+  String get syncNever => 'Not synced yet';
+
+  @override
+  String get syncUninstallWarning =>
+      'Removing Lexi Cards from your Google Drive deletes this copy. It keeps your devices in step — it isn\'t a permanent backup.';
+
+  @override
+  String get syncConnected => 'Account connected.';
+
+  @override
+  String get syncDisconnected => 'Account disconnected.';
+
+  @override
+  String get syncUpToDate => 'Already up to date.';
+
+  @override
+  String syncChangesApplied(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Synced — $count changes',
+      one: 'Synced — 1 change',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncNeedsAccount => 'Connect a Google account first.';
+
+  @override
+  String get syncRemoteBusy =>
+      'Another device is syncing right now. Try again in a moment.';
+
+  @override
+  String get syncSnapshotTooNew =>
+      'This data was synced by a newer version of Lexi Cards. Update the app to continue syncing.';
 }

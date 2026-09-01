@@ -5,6 +5,7 @@ import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'core/di/injection_container.dart';
 import 'core/notifications/notification_service.dart';
 import 'core/router/app_router.dart';
+import 'core/sync/google_drive_storage.dart';
 import 'core/theme/app_theme.dart';
 import 'features/settings/domain/usecases/get_reminder_settings.dart';
 import 'features/settings/presentation/bloc/locale_cubit.dart';
@@ -30,6 +31,11 @@ Future<void> main() async {
       minute: reminderSettings.minute,
     );
   }
+
+  // Local configuration only — no network, and deliberately no sign-in. The
+  // account is restored, and any sync run, from the UI once the first frame is
+  // up; awaiting either here would hang a cold start on a bad connection.
+  await getIt<GoogleDriveStorage>().init();
 
   await getIt<LocaleCubit>().load();
 

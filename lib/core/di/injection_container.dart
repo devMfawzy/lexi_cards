@@ -21,7 +21,12 @@ import '../../features/settings/domain/usecases/get_reminder_settings.dart';
 import '../../features/settings/domain/usecases/save_reminder_settings.dart';
 import '../../features/settings/presentation/bloc/locale_cubit.dart';
 import '../../features/stats/domain/usecases/get_review_stats.dart';
+import '../../features/sync/data/repositories/sync_repository_impl.dart';
+import '../../features/sync/domain/repositories/sync_repository.dart';
+import '../../features/sync/presentation/bloc/sync_cubit.dart';
 import '../notifications/notification_service.dart';
+import '../sync/cloud_storage.dart';
+import '../sync/google_drive_storage.dart';
 
 final getIt = GetIt.instance;
 
@@ -62,6 +67,21 @@ Future<void> initDependencies() async {
   // Settings feature - usecases
   getIt.registerFactory(() => GetReminderSettings(getIt()));
   getIt.registerFactory(() => SaveReminderSettings(getIt()));
+
+  // Cloud sync
+  getIt.registerLazySingleton<GoogleDriveStorage>(() => GoogleDriveStorage());
+  // Registered under the interface too: everything above the transport talks
+  // to CloudStorage, and only startup needs the concrete type to call init().
+  getIt.registerLazySingleton<CloudStorage>(() => getIt<GoogleDriveStorage>());
+  getIt.registerLazySingleton<SyncRepository>(
+    () => SyncRepositoryImpl(localDataSource: getIt(), cloudStorage: getIt()),
+  );
+  // Singleton for the same reason as LocaleCubit: the linked account is
+  // app-wide, shown in Settings and acted on from the sync screen, and a run
+  // started on one shouldn't be thrown away by navigating to the other.
+  getIt.registerLazySingleton<SyncCubit>(
+    () => SyncCubit(cloudStorage: getIt(), syncRepository: getIt()),
+  );
 
   // Locale - app-wide singleton (see LocaleCubit doc comment)
   getIt.registerLazySingleton<LocaleCubit>(() => LocaleCubit(repository: getIt()));

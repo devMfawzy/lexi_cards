@@ -72,5 +72,23 @@
   "languageTitle": "اللغة",
   "languageSystemDefault": "إعداد النظام",
   "languageEnglish": "English",
-  "languageArabic": "العربية"
+  "languageArabic": "العربية",
+
+  "syncTitle": "المزامنة",
+  "syncNotConnected": "غير متصل",
+  "syncExplainer": "تُحفظ مجموعاتك وتقدمك في مجلد خاص داخل Google Drive. لا يمكن لـ Lexi Cards الاطلاع على أي ملف آخر هناك.",
+  "syncConnectAccount": "ربط حساب Google",
+  "syncDisconnect": "إلغاء الربط",
+  "syncNow": "مزامنة الآن",
+  "syncAccountLabel": "الحساب",
+  "syncLastSynced": "آخر مزامنة {time}",
+  "syncNever": "لم تتم المزامنة بعد",
+  "syncUninstallWarning": "إزالة Lexi Cards من Google Drive تحذف هذه النسخة. المزامنة تبقي أجهزتك متوافقة، لكنها ليست نسخة احتياطية دائمة.",
+  "syncConnected": "تم ربط الحساب.",
+  "syncDisconnected": "تم إلغاء ربط الحساب.",
+  "syncUpToDate": "كل شيء محدّث بالفعل.",
+  "syncChangesApplied": "{count, plural, zero{تمت المزامنة — لا تغييرات} one{تمت المزامنة — تغيير واحد} two{تمت المزامنة — تغييران} few{تمت المزامنة — {count} تغييرات} many{تمت المزامنة — {count} تغييرًا} other{تمت المزامنة — {count} تغيير}}",
+  "syncNeedsAccount": "اربط حساب Google أولًا.",
+  "syncRemoteBusy": "جهاز آخر يقوم بالمزامنة الآن. حاول بعد قليل.",
+  "syncSnapshotTooNew": "تمت مزامنة هذه البيانات بإصدار أحدث من Lexi Cards. حدّث التطبيق لمتابعة المزامنة."
 }

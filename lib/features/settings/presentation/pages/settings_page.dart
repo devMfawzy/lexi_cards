@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../sync/presentation/bloc/sync_cubit.dart';
 import '../bloc/locale_cubit.dart';
 import '../bloc/settings_cubit.dart';
 import '../bloc/settings_state.dart';
@@ -11,12 +13,19 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => SettingsCubit(
-        getReminderSettingsUseCase: getIt(),
-        saveReminderSettingsUseCase: getIt(),
-        notificationService: getIt(),
-      )..load(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => SettingsCubit(
+            getReminderSettingsUseCase: getIt(),
+            saveReminderSettingsUseCase: getIt(),
+            notificationService: getIt(),
+          )..load(),
+        ),
+        // The shared instance, so the linked account shown here and the sync
+        // screen's state are the same thing.
+        BlocProvider.value(value: getIt<SyncCubit>()..load()),
+      ],
       child: const _SettingsView(),
     );
   }
@@ -143,6 +152,19 @@ class _SettingsView extends StatelessWidget {
                   title: Text(l10n.languageTitle),
                   trailing: Text(_languageLabel(l10n, locale)),
                   onTap: () => _pickLanguage(context, l10n, locale),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Card(
+                child: ListTile(
+                  title: Text(l10n.syncTitle),
+                  // Reads the shared cubit rather than the repository so the
+                  // linked account shows here without a second round trip.
+                  trailing: Text(
+                    context.watch<SyncCubit>().state.accountEmail ??
+                        l10n.syncNotConnected,
+                  ),
+                  onTap: () => context.push('/settings/sync'),
                 ),
               ),
               const SizedBox(height: 16),

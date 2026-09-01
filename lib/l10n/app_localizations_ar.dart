@@ -233,4 +233,72 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get languageArabic => 'العربية';
+
+  @override
+  String get syncTitle => 'المزامنة';
+
+  @override
+  String get syncNotConnected => 'غير متصل';
+
+  @override
+  String get syncExplainer =>
+      'تُحفظ مجموعاتك وتقدمك في مجلد خاص داخل Google Drive. لا يمكن لـ Lexi Cards الاطلاع على أي ملف آخر هناك.';
+
+  @override
+  String get syncConnectAccount => 'ربط حساب Google';
+
+  @override
+  String get syncDisconnect => 'إلغاء الربط';
+
+  @override
+  String get syncNow => 'مزامنة الآن';
+
+  @override
+  String get syncAccountLabel => 'الحساب';
+
+  @override
+  String syncLastSynced(String time) {
+    return 'آخر مزامنة $time';
+  }
+
+  @override
+  String get syncNever => 'لم تتم المزامنة بعد';
+
+  @override
+  String get syncUninstallWarning =>
+      'إزالة Lexi Cards من Google Drive تحذف هذه النسخة. المزامنة تبقي أجهزتك متوافقة، لكنها ليست نسخة احتياطية دائمة.';
+
+  @override
+  String get syncConnected => 'تم ربط الحساب.';
+
+  @override
+  String get syncDisconnected => 'تم إلغاء ربط الحساب.';
+
+  @override
+  String get syncUpToDate => 'كل شيء محدّث بالفعل.';
+
+  @override
+  String syncChangesApplied(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تمت المزامنة — $count تغيير',
+      many: 'تمت المزامنة — $count تغييرًا',
+      few: 'تمت المزامنة — $count تغييرات',
+      two: 'تمت المزامنة — تغييران',
+      one: 'تمت المزامنة — تغيير واحد',
+      zero: 'تمت المزامنة — لا تغييرات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncNeedsAccount => 'اربط حساب Google أولًا.';
+
+  @override
+  String get syncRemoteBusy => 'جهاز آخر يقوم بالمزامنة الآن. حاول بعد قليل.';
+
+  @override
+  String get syncSnapshotTooNew =>
+      'تمت مزامنة هذه البيانات بإصدار أحدث من Lexi Cards. حدّث التطبيق لمتابعة المزامنة.';
 }

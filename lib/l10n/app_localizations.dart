@@ -493,6 +493,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'العربية'**
   String get languageArabic;
+
+  /// Row label in Settings, and the title of the sync screen
+  ///
+  /// In en, this message translates to:
+  /// **'Sync'**
+  String get syncTitle;
+
+  /// Shown next to the Sync row when no account is linked
+  ///
+  /// In en, this message translates to:
+  /// **'Not connected'**
+  String get syncNotConnected;
+
+  /// Explains what syncing does and what the app can access
+  ///
+  /// In en, this message translates to:
+  /// **'Your decks and progress are kept in a private folder in your Google Drive. Lexi Cards can\'t see any other file there.'**
+  String get syncExplainer;
+
+  /// Button that starts the Google sign-in flow
+  ///
+  /// In en, this message translates to:
+  /// **'Connect Google account'**
+  String get syncConnectAccount;
+
+  /// Button that unlinks the connected Google account
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get syncDisconnect;
+
+  /// Button that runs a sync immediately
+  ///
+  /// In en, this message translates to:
+  /// **'Sync now'**
+  String get syncNow;
+
+  /// Row label above the connected account's email address
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get syncAccountLabel;
+
+  /// Shows when the last successful sync happened
+  ///
+  /// In en, this message translates to:
+  /// **'Last synced {time}'**
+  String syncLastSynced(String time);
+
+  /// Shown in place of a last-synced time before the first sync
+  ///
+  /// In en, this message translates to:
+  /// **'Not synced yet'**
+  String get syncNever;
+
+  /// Warns that the Drive app-data folder is deleted when the user removes the app from Drive
+  ///
+  /// In en, this message translates to:
+  /// **'Removing Lexi Cards from your Google Drive deletes this copy. It keeps your devices in step — it isn\'t a permanent backup.'**
+  String get syncUninstallWarning;
+
+  /// Confirmation after linking a Google account
+  ///
+  /// In en, this message translates to:
+  /// **'Account connected.'**
+  String get syncConnected;
+
+  /// Confirmation after unlinking a Google account
+  ///
+  /// In en, this message translates to:
+  /// **'Account disconnected.'**
+  String get syncDisconnected;
+
+  /// Shown after a sync that found nothing new on either side
+  ///
+  /// In en, this message translates to:
+  /// **'Already up to date.'**
+  String get syncUpToDate;
+
+  /// Shown after a sync that changed something, with the number of records added, updated or removed
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Synced — 1 change} other{Synced — {count} changes}}'**
+  String syncChangesApplied(int count);
+
+  /// Shown when a sync is attempted with no linked account
+  ///
+  /// In en, this message translates to:
+  /// **'Connect a Google account first.'**
+  String get syncNeedsAccount;
+
+  /// Shown when the cloud copy kept changing during the sync
+  ///
+  /// In en, this message translates to:
+  /// **'Another device is syncing right now. Try again in a moment.'**
+  String get syncRemoteBusy;
+
+  /// Shown when the cloud copy uses a schema version this build cannot read
+  ///
+  /// In en, this message translates to:
+  /// **'This data was synced by a newer version of Lexi Cards. Update the app to continue syncing.'**
+  String get syncSnapshotTooNew;
 }
 
 class _AppLocalizationsDelegate
