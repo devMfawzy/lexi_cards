@@ -42,6 +42,16 @@ abstract class LocalDataSource {
   Future<List<ReviewLogModel>> getAllReviewLogs();
 
   Future<List<TombstoneModel>> getTombstones();
+
+  /// Writes the result of a merge, in an order that survives interruption.
+  Future<void> applyMerge({
+    required List<TombstoneModel> tombstones,
+    required List<DeckModel> decks,
+    required List<FlashcardModel> cards,
+    required List<ReviewLogModel> logs,
+    required List<String> deletedCardIds,
+    required List<String> deletedDeckIds,
+  });
 }
 
 class LocalDataSourceImpl implements LocalDataSource {
@@ -175,6 +185,41 @@ class LocalDataSourceImpl implements LocalDataSource {
   Future<List<TombstoneModel>> getTombstones() async {
     final box = await _tombstones;
     return box.values.toList();
+  }
+
+  @override
+  Future<void> applyMerge({
+    required List<TombstoneModel> tombstones,
+    required List<DeckModel> decks,
+    required List<FlashcardModel> cards,
+    required List<ReviewLogModel> logs,
+    required List<String> deletedCardIds,
+    required List<String> deletedDeckIds,
+  }) async {
+    // Hive has no transaction spanning boxes, so this will sometimes be
+    // interrupted partway. The order is chosen so that every point it can stop
+    // at leaves a database that is merely stale rather than wrong: intent is
+    // recorded first, additions land before removals, and children are removed
+    // before their parents. Re-running the sync repairs whatever was missed.
+    //
+    // Deletions here go straight to the box rather than through deleteCard /
+    // deleteDeck, because those record a *new* tombstone stamped now — which
+    // would overwrite the real deletion time coming from the other device and
+    // let the record resurrect itself on the next merge.
+    final tombstoneBox = await _tombstones;
+    await tombstoneBox.putAll({for (final t in tombstones) t.storageKey: t});
+
+    final deckBox = await _decks;
+    await deckBox.putAll({for (final d in decks) d.id: d});
+
+    final cardBox = await _cards;
+    await cardBox.putAll({for (final c in cards) c.id: c});
+
+    final logBox = await _reviewLogs;
+    await logBox.putAll({for (final l in logs) l.id: l});
+
+    await cardBox.deleteAll(deletedCardIds);
+    await deckBox.deleteAll(deletedDeckIds);
   }
 
   Future<void> _writeTombstone({required String id, required String entityType}) async {
