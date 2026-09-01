@@ -79,6 +79,8 @@
   "@deleteCardBody": {"description": "Body of the delete-card confirmation dialog"},
   "imagePlaceholder": "📷 Image",
   "@imagePlaceholder": {"description": "List preview placeholder for a card face that has an image but no text"},
+  "imageTooLarge": "That image is too large to add to a card. Try a smaller one.",
+  "@imageTooLarge": {"description": "Error shown when a picked image cannot be compressed under the embed size limit"},
 
   "studyAllTitle": "Study All",
   "@studyAllTitle": {"description": "AppBar title when reviewing across every deck"},

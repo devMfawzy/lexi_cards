@@ -114,6 +114,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get imagePlaceholder => '📷 صورة';
 
   @override
+  String get imageTooLarge =>
+      'هذه الصورة كبيرة جدًا لإضافتها إلى بطاقة. جرّب صورة أصغر.';
+
+  @override
   String get studyAllTitle => 'دراسة الكل';
 
   @override

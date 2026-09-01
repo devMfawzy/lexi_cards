@@ -2,22 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../rich_text/quill_content.dart';
 import 'quill_image_provider_cache.dart';
-
-/// Converts a picked image (local path or pasted link) into what actually
-/// gets embedded, then inserts it at the current selection — the same
-/// mechanics as the (deprecated) `insertImageBlock` extension, written out
-/// directly to avoid depending on a deprecated API.
-Future<void> _insertPickedImage(String imageUrl, QuillController controller) async {
-  final source = await imageEmbedSourceFor(imageUrl);
-  final index = controller.selection.baseOffset;
-  final length = controller.selection.extentOffset - index;
-  controller
-    ..skipRequestKeyboard = true
-    ..replaceText(index, length, BlockEmbed.image(source), null)
-    ..moveCursorToPosition(index + 1);
-}
 
 /// A labeled, boxed rich-text input: a curated Quill toolbar (bold, italic,
 /// underline, color) above an inline editor. The caller owns [controller]'s
@@ -46,6 +33,31 @@ class _RichTextEditorFieldState extends State<RichTextEditorField> {
     _focusNode.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  /// Converts a picked image (local path or pasted link) into what actually
+  /// gets embedded, then inserts it at the current selection — the same
+  /// mechanics as the (deprecated) `insertImageBlock` extension, written out
+  /// directly to avoid depending on a deprecated API.
+  Future<void> _insertPickedImage(String imageUrl, QuillController controller) async {
+    final String source;
+    try {
+      source = await imageEmbedSourceFor(imageUrl);
+    } on ImageTooLargeException {
+      // Refusing is the honest outcome: the image lives inline in the card,
+      // so silently inlining an oversized one would bloat the record itself.
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.imageTooLarge)),
+      );
+      return;
+    }
+    final index = controller.selection.baseOffset;
+    final length = controller.selection.extentOffset - index;
+    controller
+      ..skipRequestKeyboard = true
+      ..replaceText(index, length, BlockEmbed.image(source), null)
+      ..moveCursorToPosition(index + 1);
   }
 
   @override

@@ -37,6 +37,7 @@
   "deleteCardTitle": "حذف البطاقة؟",
   "deleteCardBody": "لا يمكن التراجع عن هذا الإجراء.",
   "imagePlaceholder": "📷 صورة",
+  "imageTooLarge": "هذه الصورة كبيرة جدًا لإضافتها إلى بطاقة. جرّب صورة أصغر.",
 
   "studyAllTitle": "دراسة الكل",
   "devSkipAheadTooltip": "تطوير: تخطي 15 دقيقة",

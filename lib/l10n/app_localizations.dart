@@ -296,6 +296,12 @@ abstract class AppLocalizations {
   /// **'📷 Image'**
   String get imagePlaceholder;
 
+  /// Error shown when a picked image cannot be compressed under the embed size limit
+  ///
+  /// In en, this message translates to:
+  /// **'That image is too large to add to a card. Try a smaller one.'**
+  String get imageTooLarge;
+
   /// AppBar title when reviewing across every deck
   ///
   /// In en, this message translates to:

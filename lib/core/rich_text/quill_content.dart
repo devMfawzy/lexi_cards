@@ -88,6 +88,12 @@ String mimeTypeForPath(String path) {
 String dataUriFromBytes(Uint8List bytes, {required String mimeType}) =>
     'data:$mimeType;base64,${base64Encode(bytes)}';
 
+/// Thrown when a picked image can't be brought under [_maxEmbeddedBytes].
+/// Surfaced to the user rather than silently inlining something enormous.
+class ImageTooLargeException implements Exception {
+  const ImageTooLargeException();
+}
+
 /// Longest-side cap for an embedded image. Cards are viewed on a phone
 /// screen, so there's no reason to keep a multi-megapixel camera photo
 /// around — this alone is usually what shrinks a multi-MB original down to a
@@ -95,63 +101,100 @@ String dataUriFromBytes(Uint8List bytes, {required String mimeType}) =>
 const _maxImageDimension = 1600;
 const _jpegQuality = 82;
 
-/// Decodes, resizes, and re-encodes a picked image. Runs off the UI thread
-/// via [compute] — decode/resize/encode on a full-resolution camera photo is
-/// real CPU work that would otherwise jank the image-picker flow.
+/// Hard ceiling on a single embedded image's encoded bytes, before base64
+/// (which adds a further ~33%). Images live *inline* in the card record, so an
+/// uncapped image means an uncapped card — and every card is carried whole in
+/// the sync payload. [_dimensionLadder] is walked until the result fits.
+const _maxEmbeddedBytes = 900 * 1024;
+const _dimensionLadder = [_maxImageDimension, 1200, 900, 640];
+
+/// Decodes, resizes, and re-encodes a picked image so it fits within
+/// [_maxEmbeddedBytes], returning null when that isn't achievable. Runs off
+/// the UI thread via [compute] — decode/resize/encode on a full-resolution
+/// camera photo is real CPU work that would otherwise jank the picker flow.
 ///
 /// Takes and returns a (bytes, mimeType) pair rather than a plain
 /// [Uint8List] because compression can change the format (a re-encoded
 /// opaque PNG becomes a smaller JPEG), so the mime type has to travel with
 /// the bytes it actually describes.
-(Uint8List, String) _resizeAndCompress((Uint8List, String) original) {
-  final (bytes, mimeType) = original;
+(Uint8List, String)? _resizeAndCompress((Uint8List, String) original) {
+  final (bytes, _) = original;
   try {
     final decoded = img.decodeImage(bytes);
-    // Unrecognized/undecodable format (e.g. HEIC — the `image` package
-    // doesn't decode it) — embed the original bytes unchanged rather than fail.
-    if (decoded == null) return original;
+    // Undecodable format. Note this is an *Android* path, not the iOS one the
+    // obvious guess suggests: iOS's image_picker sniffs the leading byte and
+    // re-encodes anything it doesn't recognise (HEIC included) to JPEG before
+    // we ever see it, whereas Android hands back the picked file untouched
+    // unless a quality/size limit was requested. We can't shrink what we
+    // can't decode, so it's only safe if it already fits.
+    if (decoded == null) return _originalIfSmallEnough(original);
 
-    final longestSide = decoded.width > decoded.height ? decoded.width : decoded.height;
-    final resized = longestSide > _maxImageDimension
-        ? img.copyResize(
-            decoded,
-            width: decoded.width >= decoded.height ? _maxImageDimension : null,
-            height: decoded.height > decoded.width ? _maxImageDimension : null,
-            interpolation: img.Interpolation.average,
-          )
-        : decoded;
+    for (final maxSide in _dimensionLadder) {
+      final resized = _resizedToFit(decoded, maxSide);
+      // Keep transparency (PNG) if the source has any; otherwise JPEG
+      // compresses a photo far smaller than PNG ever would.
+      final candidate = resized.hasAlpha
+          ? (img.encodePng(resized), 'image/png')
+          : (img.encodeJpg(resized, quality: _jpegQuality), 'image/jpeg');
+      if (candidate.$1.length > _maxEmbeddedBytes) continue;
+      // Re-encoding isn't guaranteed to win against an already-small,
+      // already-optimized original (e.g. an icon-sized PNG). Safe to return
+      // it here: it's no larger than a candidate already under the cap.
+      if (candidate.$1.length >= bytes.length) return original;
+      return candidate;
+    }
 
-    // Keep transparency (PNG) if the source has any; otherwise JPEG
-    // compresses a photo far smaller than PNG ever would.
-    final hasAlpha = resized.hasAlpha;
-    final encoded = hasAlpha
-        ? img.encodePng(resized)
-        : img.encodeJpg(resized, quality: _jpegQuality);
-
-    // Re-encoding isn't guaranteed to win against an already-small/optimized
-    // original (e.g. a small icon-sized PNG) — only use it if it actually did.
-    if (encoded.length >= bytes.length) return original;
-    return (encoded, hasAlpha ? 'image/png' : 'image/jpeg');
+    // Still over the cap at the smallest size, which means transparency is
+    // what's holding it there — PNG can't compress a photograph. Flatten and
+    // let JPEG do what PNG can't.
+    final flattened = _flattenOntoWhite(_resizedToFit(decoded, _dimensionLadder.last));
+    final jpg = img.encodeJpg(flattened, quality: _jpegQuality);
+    return jpg.length <= _maxEmbeddedBytes ? (jpg, 'image/jpeg') : null;
   } catch (_) {
-    // A malformed/truncated/unsupported input can throw partway through
-    // decoding rather than returning null — embed the original unchanged
-    // rather than lose the picked image entirely.
-    return original;
+    // A malformed/truncated input can throw partway through decoding rather
+    // than returning null.
+    return _originalIfSmallEnough(original);
   }
+}
+
+(Uint8List, String)? _originalIfSmallEnough((Uint8List, String) original) =>
+    original.$1.length <= _maxEmbeddedBytes ? original : null;
+
+img.Image _resizedToFit(img.Image source, int maxSide) {
+  final longest = source.width > source.height ? source.width : source.height;
+  if (longest <= maxSide) return source;
+  return img.copyResize(
+    source,
+    width: source.width >= source.height ? maxSide : null,
+    height: source.height > source.width ? maxSide : null,
+    interpolation: img.Interpolation.average,
+  );
+}
+
+/// JPEG has no alpha channel, so transparent pixels would encode as whatever
+/// happens to sit in their RGB channels — commonly black. Compositing onto
+/// white first keeps the result looking like what the user actually picked.
+img.Image _flattenOntoWhite(img.Image source) {
+  final canvas = img.Image(width: source.width, height: source.height, numChannels: 3);
+  img.fill(canvas, color: img.ColorRgb8(255, 255, 255));
+  return img.compositeImage(canvas, source);
 }
 
 /// Converts a picked image's source into what gets embedded in the Delta.
 /// A remote link (the toolbar's "Link" option) is inserted as-is; a local
 /// file (gallery/camera) is resized/compressed and inlined as a base64 data
-/// URI.
+/// URI. Throws [ImageTooLargeException] if the image can't be brought under
+/// the embed size cap.
 Future<String> imageEmbedSourceFor(String pickedPathOrUrl) async {
   if (pickedPathOrUrl.startsWith('http://') || pickedPathOrUrl.startsWith('https://')) {
     return pickedPathOrUrl;
   }
   final originalBytes = await File(pickedPathOrUrl).readAsBytes();
-  final (bytes, mimeType) = await compute(
+  final result = await compute(
     _resizeAndCompress,
     (originalBytes, mimeTypeForPath(pickedPathOrUrl)),
   );
+  if (result == null) throw const ImageTooLargeException();
+  final (bytes, mimeType) = result;
   return dataUriFromBytes(bytes, mimeType: mimeType);
 }

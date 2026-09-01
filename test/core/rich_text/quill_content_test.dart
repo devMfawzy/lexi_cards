@@ -160,19 +160,7 @@ void main() {
     });
 
     test('downsizes an oversized opaque image and re-encodes it as jpeg', () async {
-      // Noisy per-pixel content rather than a flat fill — a solid color
-      // compresses so well as PNG that a downscaled/recompressed JPEG can't
-      // beat it, which isn't representative of an actual photo.
-      final original = img.Image(width: 2000, height: 1000); // 2:1, no alpha
-      final random = Random(42);
-      for (var y = 0; y < original.height; y++) {
-        for (var x = 0; x < original.width; x++) {
-          original.setPixelRgb(x, y, random.nextInt(256), random.nextInt(256), random.nextInt(256));
-        }
-      }
-      final file = await File(
-        '${Directory.systemTemp.path}/quill_content_test_${DateTime.now().microsecondsSinceEpoch}.png',
-      ).writeAsBytes(img.encodePng(original));
+      final file = await _writePng(_photoLike(width: 2000, height: 1000));
 
       try {
         final source = await imageEmbedSourceFor(file.path);
@@ -184,6 +172,74 @@ void main() {
         final resized = img.decodeImage(decodedBytes)!;
         expect(resized.width, 1600);
         expect(resized.height, 800); // aspect ratio preserved
+      } finally {
+        await file.delete();
+      }
+    });
+
+    test('steps down to a smaller size when 1600px would exceed the size cap', () async {
+      // Per-pixel random noise is incompressible, so a 1600px encode blows the
+      // cap and the dimension ladder has to keep going. A real photo never
+      // looks like this, which is exactly why it's the useful stress case.
+      final file = await _writePng(_noise(width: 2400, height: 1200));
+
+      try {
+        final source = await imageEmbedSourceFor(file.path);
+        final decodedBytes = base64Decode(source.split(',').last);
+
+        expect(decodedBytes.length, lessThanOrEqualTo(900 * 1024));
+        final resized = img.decodeImage(decodedBytes)!;
+        expect(resized.width, lessThan(1600));
+        expect(resized.width * 1.0 / resized.height, closeTo(2.0, 0.01));
+      } finally {
+        await file.delete();
+      }
+    });
+
+    test('flattens transparency onto white when png cannot get under the cap', () async {
+      // Noise *and* an alpha channel, square so that even the smallest rung
+      // still has too many pixels: PNG can't compress it at any size, so the
+      // only way under the cap is to drop alpha and let JPEG handle it.
+      final file = await _writePng(_noise(width: 2400, height: 2400, withAlpha: true));
+
+      try {
+        final source = await imageEmbedSourceFor(file.path);
+        expect(source, startsWith('data:image/jpeg;base64,'));
+
+        final decodedBytes = base64Decode(source.split(',').last);
+        expect(decodedBytes.length, lessThanOrEqualTo(900 * 1024));
+        expect(img.decodeImage(decodedBytes)!.hasAlpha, isFalse);
+      } finally {
+        await file.delete();
+      }
+    });
+
+    test('refuses an undecodable file that is already over the cap', () async {
+      // Can't decode it, so can't shrink it — inlining it whole would bloat
+      // the card record itself, so the pick is rejected instead.
+      final file = await File(
+        '${Directory.systemTemp.path}/quill_content_test_${DateTime.now().microsecondsSinceEpoch}.heic',
+      ).writeAsBytes(Uint8List(2 * 1024 * 1024));
+
+      try {
+        expect(
+          () => imageEmbedSourceFor(file.path),
+          throwsA(isA<ImageTooLargeException>()),
+        );
+      } finally {
+        await file.delete();
+      }
+    });
+
+    test('embeds an undecodable file unchanged when it is small enough', () async {
+      final bytes = Uint8List.fromList(List.filled(1024, 7));
+      final file = await File(
+        '${Directory.systemTemp.path}/quill_content_test_${DateTime.now().microsecondsSinceEpoch}.heic',
+      ).writeAsBytes(bytes);
+
+      try {
+        final source = await imageEmbedSourceFor(file.path);
+        expect(base64Decode(source.split(',').last), bytes);
       } finally {
         await file.delete();
       }
@@ -225,3 +281,48 @@ void main() {
     });
   });
 }
+
+/// Smooth, varied content with a light dither — the dither defeats PNG's
+/// row prediction (so the source file is genuinely large, like a photo) while
+/// JPEG absorbs it in quantization. A flat fill would compress so well as PNG
+/// that no re-encode could ever beat it, which isn't a realistic case.
+img.Image _photoLike({required int width, required int height}) {
+  final image = img.Image(width: width, height: height);
+  final random = Random(1);
+  int channel(num base) => (base + random.nextInt(13) - 6).clamp(0, 255).toInt();
+  for (var y = 0; y < height; y++) {
+    for (var x = 0; x < width; x++) {
+      image.setPixelRgb(
+        x,
+        y,
+        channel(sin(x / 23) * 110 + 128),
+        channel(sin(y / 31) * 110 + 128),
+        channel(sin((x + y) / 19) * 110 + 128),
+      );
+    }
+  }
+  return image;
+}
+
+/// Per-pixel random noise — deliberately incompressible in any format, to
+/// force the encoder down the dimension ladder.
+img.Image _noise({required int width, required int height, bool withAlpha = false}) {
+  final image = img.Image(width: width, height: height, numChannels: withAlpha ? 4 : 3);
+  final random = Random(42);
+  for (var y = 0; y < height; y++) {
+    for (var x = 0; x < width; x++) {
+      final (r, g, b) = (random.nextInt(256), random.nextInt(256), random.nextInt(256));
+      if (withAlpha) {
+        image.setPixelRgba(x, y, r, g, b, random.nextInt(256));
+      } else {
+        image.setPixelRgb(x, y, r, g, b);
+      }
+    }
+  }
+  return image;
+}
+
+int _tmpCounter = 0;
+Future<File> _writePng(img.Image image) => File(
+      '${Directory.systemTemp.path}/quill_content_test_${DateTime.now().microsecondsSinceEpoch}_${_tmpCounter++}.png',
+    ).writeAsBytes(img.encodePng(image));
