@@ -11,6 +11,7 @@ I built this as a portfolio piece to show a complete, non-trivial Flutter app: c
   <img src="screenshots/cards.jpg" width="200" alt="Card list with rich text and an image card">
   <img src="screenshots/review.png" width="200" alt="Review session, answer revealed">
   <img src="screenshots/stats.png" width="200" alt="Stats screen with streaks and 7-day charts">
+  <img src="screenshots/sync.png" width="200" alt="Sync screen with a connected Google account">
 </p>
 
 ## What's in it
