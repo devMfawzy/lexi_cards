@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.CAMERA"/>
     <application
-        android:label="lexi_cards"
+        android:label="Lexi Cards"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
