@@ -1,4 +1,4 @@
-# lexi_cards
+# Lexi Cards
 
 [![CI](https://github.com/devMfawzy/lexi_cards/actions/workflows/ci.yml/badge.svg)](https://github.com/devMfawzy/lexi_cards/actions/workflows/ci.yml)
 
