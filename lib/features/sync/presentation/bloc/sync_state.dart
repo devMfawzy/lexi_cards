@@ -28,6 +28,15 @@ class SyncState extends Equatable {
   /// Detail for [SyncFeedback.syncedWithChanges].
   final SyncOutcome? outcome;
 
+  /// Bumped whenever a sync actually wrote something locally.
+  ///
+  /// Sync writes to the database directly, behind the back of whatever screens
+  /// happen to be showing that data, so they have no way to know their state
+  /// went stale. Screens watch this and reload when it moves. A counter rather
+  /// than a flag because it has to survive the transient fields clearing on
+  /// the next emit.
+  final int dataVersion;
+
   const SyncState({
     this.status = SyncStatus.idle,
     this.accountEmail,
@@ -35,6 +44,7 @@ class SyncState extends Equatable {
     this.feedback,
     this.errorMessage,
     this.outcome,
+    this.dataVersion = 0,
   });
 
   bool get isLinked => accountEmail != null;
@@ -49,6 +59,7 @@ class SyncState extends Equatable {
     SyncFeedback? feedback,
     String? errorMessage,
     SyncOutcome? outcome,
+    int? dataVersion,
   }) => SyncState(
     status: status ?? this.status,
     accountEmail: clearAccount ? null : (accountEmail ?? this.accountEmail),
@@ -56,8 +67,17 @@ class SyncState extends Equatable {
     feedback: feedback,
     errorMessage: errorMessage,
     outcome: outcome,
+    dataVersion: dataVersion ?? this.dataVersion,
   );
 
   @override
-  List<Object?> get props => [status, accountEmail, lastSyncedAt, feedback, errorMessage, outcome];
+  List<Object?> get props => [
+    status,
+    accountEmail,
+    lastSyncedAt,
+    feedback,
+    errorMessage,
+    outcome,
+    dataVersion,
+  ];
 }

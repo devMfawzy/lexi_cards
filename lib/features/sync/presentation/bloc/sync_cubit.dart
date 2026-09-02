@@ -70,6 +70,9 @@ class SyncCubit extends Cubit<SyncState> {
               ? SyncFeedback.alreadyUpToDate
               : SyncFeedback.syncedWithChanges,
           outcome: outcome.isUpToDate ? null : outcome,
+          // Only when something actually landed locally, so screens don't
+          // rebuild for a sync that turned out to be a no-op.
+          dataVersion: outcome.isUpToDate ? state.dataVersion : state.dataVersion + 1,
         ),
       );
     } on NotLinkedException {

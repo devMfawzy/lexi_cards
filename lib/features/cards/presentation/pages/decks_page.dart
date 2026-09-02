@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../sync/presentation/bloc/sync_cubit.dart';
+import '../../../sync/presentation/bloc/sync_state.dart';
 import '../bloc/decks_cubit.dart';
 import '../bloc/decks_state.dart';
 import '../widgets/deck_list_tile.dart';
@@ -16,14 +18,19 @@ class DecksPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => DecksCubit(
-        getDecks: getIt(),
-        createDeckUseCase: getIt(),
-        renameDeckUseCase: getIt(),
-        deleteDeckUseCase: getIt(),
-        getCards: getIt(),
-      )..loadDecks(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => DecksCubit(
+            getDecks: getIt(),
+            createDeckUseCase: getIt(),
+            renameDeckUseCase: getIt(),
+            deleteDeckUseCase: getIt(),
+            getCards: getIt(),
+          )..loadDecks(),
+        ),
+        BlocProvider.value(value: getIt<SyncCubit>()),
+      ],
       child: const _DecksView(),
     );
   }
@@ -51,43 +58,62 @@ class _DecksView extends StatelessWidget {
           ),
         ],
       ),
-      body: BlocConsumer<DecksCubit, DecksState>(
-        listener: (context, state) {
-          if (state.errorMessage != null) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
-          }
-        },
-        builder: (context, state) {
-          if (state.isLoading && state.summaries.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (state.summaries.isEmpty) {
-            return EmptyState(icon: Icons.style_outlined, message: l10n.noDecksYet);
-          }
-          final totalDue = state.summaries.fold<int>(0, (sum, s) => sum + s.dueCount);
-          return RefreshIndicator(
-            onRefresh: () => context.read<DecksCubit>().loadDecks(),
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-              itemCount: state.summaries.length + 1,
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return _StudyAllHeader(dueCount: totalDue, onTap: () => context.push('/study'));
-                }
-                final summary = state.summaries[index - 1];
-                return DeckListTile(
-                  summary: summary,
-                  onTap: () => context.push('/decks/${summary.deck.id}'),
-                  onStudy: () => context.push('/decks/${summary.deck.id}/review'),
-                  onRename: (name) => context.read<DecksCubit>().renameDeck(summary.deck.id, name),
-                  onDelete: () => context.read<DecksCubit>().deleteDeck(summary.deck.id),
-                );
-              },
-            ),
-          );
-        },
+      body: BlocListener<SyncCubit, SyncState>(
+        listenWhen: (before, after) => before.dataVersion != after.dataVersion,
+        listener: (context, _) => unawaited(context.read<DecksCubit>().loadDecks()),
+        child: BlocConsumer<DecksCubit, DecksState>(
+          listener: (context, state) {
+            if (state.errorMessage != null) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
+            }
+          },
+          builder: (context, state) {
+            if (state.isLoading && state.summaries.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (state.summaries.isEmpty) {
+              // Refreshable too. The empty state is exactly when someone needs to
+              // pull — they've just linked an account and are waiting for their
+              // decks — and a bare centred column has nothing to pull on.
+              return RefreshIndicator(
+                onRefresh: () => context.read<DecksCubit>().loadDecks(),
+                child: LayoutBuilder(
+                  builder: (context, constraints) => SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: SizedBox(
+                      height: constraints.maxHeight,
+                      child: EmptyState(icon: Icons.style_outlined, message: l10n.noDecksYet),
+                    ),
+                  ),
+                ),
+              );
+            }
+            final totalDue = state.summaries.fold<int>(0, (sum, s) => sum + s.dueCount);
+            return RefreshIndicator(
+              onRefresh: () => context.read<DecksCubit>().loadDecks(),
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+                itemCount: state.summaries.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return _StudyAllHeader(dueCount: totalDue, onTap: () => context.push('/study'));
+                  }
+                  final summary = state.summaries[index - 1];
+                  return DeckListTile(
+                    summary: summary,
+                    onTap: () => context.push('/decks/${summary.deck.id}'),
+                    onStudy: () => context.push('/decks/${summary.deck.id}/review'),
+                    onRename: (name) =>
+                        context.read<DecksCubit>().renameDeck(summary.deck.id, name),
+                    onDelete: () => context.read<DecksCubit>().deleteDeck(summary.deck.id),
+                  );
+                },
+              ),
+            );
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
