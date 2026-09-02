@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:lexi_cards/core/di/injection_container.dart';
@@ -31,13 +32,16 @@ class MockSyncRepository extends Mock implements SyncRepository {}
 
 void main() {
   late MockGetDecks mockGetDecks;
+  late MockGetCards mockGetCards;
   late MockSyncRepository mockSyncRepository;
   late SyncCubit syncCubit;
 
   setUp(() {
     mockGetDecks = MockGetDecks();
+    mockGetCards = MockGetCards();
     mockSyncRepository = MockSyncRepository();
     when(() => mockGetDecks()).thenAnswer((_) async => <Deck>[]);
+    when(() => mockGetCards(any())).thenAnswer((_) async => []);
 
     syncCubit = SyncCubit(cloudStorage: MockCloudStorage(), syncRepository: mockSyncRepository);
 
@@ -45,7 +49,7 @@ void main() {
     getIt.registerFactory<CreateDeck>(() => MockCreateDeck());
     getIt.registerFactory<RenameDeck>(() => MockRenameDeck());
     getIt.registerFactory<DeleteDeck>(() => MockDeleteDeck());
-    getIt.registerFactory<GetCards>(() => MockGetCards());
+    getIt.registerFactory<GetCards>(() => mockGetCards);
     getIt.registerSingleton<SyncCubit>(syncCubit);
   });
 
@@ -94,6 +98,44 @@ void main() {
     clearInteractions(mockGetDecks);
 
     await syncCubit.syncNow();
+    await tester.pumpAndSettle();
+
+    verify(() => mockGetDecks()).called(1);
+  });
+
+  testWidgets('the deck list reloads after returning from a pushed route', (tester) async {
+    // Reviewing changes what's due and browsing a deck can add or delete
+    // cards, so the counts here are stale the moment either screen opens. This
+    // page stays mounted underneath, so nothing else would tell it.
+    when(
+      () => mockGetDecks(),
+    ).thenAnswer((_) async => [Deck(id: 'd1', name: 'Spanish', createdAt: DateTime.utc(2026))]);
+
+    final router = GoRouter(
+      routes: [
+        GoRoute(path: '/', builder: (_, _) => const DecksPage()),
+        GoRoute(
+          path: '/decks/:id/review',
+          builder: (_, _) => const Scaffold(body: Text('reviewing')),
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      MaterialApp.router(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
+        routerConfig: router,
+      ),
+    );
+    await tester.pumpAndSettle();
+    clearInteractions(mockGetDecks);
+
+    await tester.tap(find.byIcon(Icons.play_circle_fill).last);
+    await tester.pumpAndSettle();
+    expect(find.text('reviewing'), findsOneWidget);
+
+    router.pop();
     await tester.pumpAndSettle();
 
     verify(() => mockGetDecks()).called(1);

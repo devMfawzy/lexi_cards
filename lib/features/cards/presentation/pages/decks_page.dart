@@ -39,6 +39,17 @@ class DecksPage extends StatelessWidget {
 class _DecksView extends StatelessWidget {
   const _DecksView();
 
+  /// Opens a route and reloads once it pops.
+  ///
+  /// Reviewing changes what's due and browsing a deck can add or delete cards,
+  /// so the counts this page shows are stale the moment either screen is
+  /// opened. The list stays mounted underneath, so nothing else would tell it.
+  Future<void> _openAndReload(BuildContext context, String location) async {
+    final cubit = context.read<DecksCubit>();
+    await context.push(location);
+    await cubit.loadDecks();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -98,13 +109,16 @@ class _DecksView extends StatelessWidget {
                 itemCount: state.summaries.length + 1,
                 itemBuilder: (context, index) {
                   if (index == 0) {
-                    return _StudyAllHeader(dueCount: totalDue, onTap: () => context.push('/study'));
+                    return _StudyAllHeader(
+                      dueCount: totalDue,
+                      onTap: () => _openAndReload(context, '/study'),
+                    );
                   }
                   final summary = state.summaries[index - 1];
                   return DeckListTile(
                     summary: summary,
-                    onTap: () => context.push('/decks/${summary.deck.id}'),
-                    onStudy: () => context.push('/decks/${summary.deck.id}/review'),
+                    onTap: () => _openAndReload(context, '/decks/${summary.deck.id}'),
+                    onStudy: () => _openAndReload(context, '/decks/${summary.deck.id}/review'),
                     onRename: (name) =>
                         context.read<DecksCubit>().renameDeck(summary.deck.id, name),
                     onDelete: () => context.read<DecksCubit>().deleteDeck(summary.deck.id),

@@ -47,7 +47,13 @@ class _CardsView extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.play_circle_outline),
             tooltip: l10n.study,
-            onPressed: () => context.push('/decks/$deckId/review'),
+            onPressed: () async {
+              // Reviewing changes each card's state and due date, both of
+              // which this list shows.
+              final cubit = context.read<CardsCubit>();
+              await context.push('/decks/$deckId/review');
+              await cubit.loadCards();
+            },
           ),
         ],
       ),
