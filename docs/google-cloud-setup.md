@@ -61,14 +61,30 @@ Order matters: the consent screen must exist before any client can be created.
 
 5. **Android client** — same menu → **Android**.
    Package name: `com.devmfawzy.lexi_cards`
-   SHA-1 (debug keystore on this machine):
+
+   The SHA-1 is your machine's own debug keystore, since that's the key your debug builds
+   are signed with. Read it with:
 
    ```
-   52:EB:67:31:AF:6B:A7:EF:D8:71:EA:9A:27:B3:60:78:42:D5:F4:A6
+   keytool -list -v -alias androiddebugkey -keystore ~/.android/debug.keystore \
+     -storepass android -keypass android | grep SHA1
    ```
 
 6. **Web client** — same menu → **Web application**, name it `lexi-cards server client`,
    leave redirect URIs empty. It exists only to be Android's `serverClientId`.
+
+## On the client IDs being in the repo
+
+The iOS and web client IDs are checked in — `lib/core/sync/google_sign_in_config.dart` and
+`ios/Runner/Info.plist`. That's deliberate, not an oversight: a client ID identifies the app
+to Google and ships inside every copy of the binary, so it can't be a secret in the first
+place. Google's own tooling commits them (`google-services.json` is version-controlled by
+convention).
+
+They're also useless to anyone else. An iOS client ID only works for its registered bundle
+ID, and the Android client only accepts builds signed with the registered key — so a fork
+has to create its own project regardless. The one thing that *doesn't* belong here is a
+machine's debug SHA-1, which is why step 5 tells you to read your own rather than quoting one.
 
 ## What goes into the repo afterwards
 
