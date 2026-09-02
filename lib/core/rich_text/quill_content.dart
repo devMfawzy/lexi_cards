@@ -30,8 +30,7 @@ Document _plainTextDocument(String raw) {
   return document;
 }
 
-String deltaJsonFromDocument(Document document) =>
-    jsonEncode(document.toDelta().toJson());
+String deltaJsonFromDocument(Document document) => jsonEncode(document.toDelta().toJson());
 
 /// A single-line summary of the stored content, for list previews. Quill's
 /// plain text keeps line breaks (each paragraph ends in `\n`), which would
@@ -41,11 +40,9 @@ String deltaJsonFromDocument(Document document) =>
 /// character, which reads as a mangled glyph rather than actual text, so
 /// it's stripped here too — [cardPreviewLabel] is what shows something for
 /// an embed-only face.
-String plainTextPreview(String raw) => documentFromStored(raw)
-    .toPlainText()
-    .replaceAll('￼', '')
-    .replaceAll(RegExp(r'\s+'), ' ')
-    .trim();
+String plainTextPreview(String raw) => documentFromStored(
+  raw,
+).toPlainText().replaceAll('￼', '').replaceAll(RegExp(r'\s+'), ' ').trim();
 
 /// Delta JSON `insert` ops are either a [String] (text) or a [Map] (an
 /// embed — image, video, ...). [Document.toPlainText] only covers text, so
@@ -190,10 +187,10 @@ Future<String> imageEmbedSourceFor(String pickedPathOrUrl) async {
     return pickedPathOrUrl;
   }
   final originalBytes = await File(pickedPathOrUrl).readAsBytes();
-  final result = await compute(
-    _resizeAndCompress,
-    (originalBytes, mimeTypeForPath(pickedPathOrUrl)),
-  );
+  final result = await compute(_resizeAndCompress, (
+    originalBytes,
+    mimeTypeForPath(pickedPathOrUrl),
+  ));
   if (result == null) throw const ImageTooLargeException();
   final (bytes, mimeType) = result;
   return dataUriFromBytes(bytes, mimeType: mimeType);

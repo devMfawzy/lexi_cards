@@ -33,13 +33,13 @@ class ReviewStats extends Equatable {
 
   @override
   List<Object?> get props => [
-        totalReviews,
-        totalCards,
-        cardsInProgress,
-        retentionRate,
-        currentStreakDays,
-        longestStreakDays,
-        reviewsLast7Days,
-        dueNext7Days,
-      ];
+    totalReviews,
+    totalCards,
+    cardsInProgress,
+    retentionRate,
+    currentStreakDays,
+    longestStreakDays,
+    reviewsLast7Days,
+    dueNext7Days,
+  ];
 }

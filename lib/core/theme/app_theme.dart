@@ -6,10 +6,7 @@ final ThemeData lightTheme = _buildTheme(Brightness.light);
 final ThemeData darkTheme = _buildTheme(Brightness.dark);
 
 ThemeData _buildTheme(Brightness brightness) {
-  final colorScheme = ColorScheme.fromSeed(
-    seedColor: _seedColor,
-    brightness: brightness,
-  );
+  final colorScheme = ColorScheme.fromSeed(seedColor: _seedColor, brightness: brightness);
 
   return ThemeData(
     useMaterial3: true,

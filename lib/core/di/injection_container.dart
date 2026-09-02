@@ -33,9 +33,7 @@ final getIt = GetIt.instance;
 Future<void> initDependencies() async {
   // Cards feature - data
   getIt.registerLazySingleton<LocalDataSource>(() => LocalDataSourceImpl());
-  getIt.registerLazySingleton<CardRepository>(
-    () => CardRepositoryImpl(localDataSource: getIt()),
-  );
+  getIt.registerLazySingleton<CardRepository>(() => CardRepositoryImpl(localDataSource: getIt()));
 
   // Cards feature - usecases
   getIt.registerFactory(() => GetDecks(getIt()));

@@ -6,11 +6,7 @@ class DeckSummary extends Equatable {
   final int dueCount;
   final int newCount;
 
-  const DeckSummary({
-    required this.deck,
-    required this.dueCount,
-    required this.newCount,
-  });
+  const DeckSummary({required this.deck, required this.dueCount, required this.newCount});
 
   @override
   List<Object?> get props => [deck, dueCount, newCount];
@@ -21,17 +17,9 @@ class DecksState extends Equatable {
   final bool isLoading;
   final String? errorMessage;
 
-  const DecksState({
-    this.summaries = const [],
-    this.isLoading = false,
-    this.errorMessage,
-  });
+  const DecksState({this.summaries = const [], this.isLoading = false, this.errorMessage});
 
-  DecksState copyWith({
-    List<DeckSummary>? summaries,
-    bool? isLoading,
-    String? errorMessage,
-  }) {
+  DecksState copyWith({List<DeckSummary>? summaries, bool? isLoading, String? errorMessage}) {
     return DecksState(
       summaries: summaries ?? this.summaries,
       isLoading: isLoading ?? this.isLoading,

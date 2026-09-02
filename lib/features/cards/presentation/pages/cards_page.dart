@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -52,9 +54,9 @@ class _CardsView extends StatelessWidget {
       body: BlocConsumer<CardsCubit, CardsState>(
         listener: (context, state) {
           if (state.errorMessage != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.errorMessage!)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
           }
         },
         builder: (context, state) {
@@ -62,10 +64,7 @@ class _CardsView extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (state.cards.isEmpty) {
-            return EmptyState(
-              icon: Icons.note_add_outlined,
-              message: l10n.noCardsYet,
-            );
+            return EmptyState(icon: Icons.note_add_outlined, message: l10n.noCardsYet);
           }
           return ListView.builder(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
@@ -89,7 +88,7 @@ class _CardsView extends StatelessWidget {
             builder: (_) => const CardEditorDialog(),
           );
           if (result != null) {
-            cubit.addCard(result.$1, result.$2);
+            unawaited(cubit.addCard(result.$1, result.$2));
           }
         },
         child: const Icon(Icons.add),
@@ -101,13 +100,10 @@ class _CardsView extends StatelessWidget {
     final cubit = context.read<CardsCubit>();
     final result = await showDialog<(String, String)>(
       context: context,
-      builder: (_) => CardEditorDialog(
-        initialFront: card.front,
-        initialBack: card.back,
-      ),
+      builder: (_) => CardEditorDialog(initialFront: card.front, initialBack: card.back),
     );
     if (result != null) {
-      cubit.updateCard(card, result.$1, result.$2);
+      unawaited(cubit.updateCard(card, result.$1, result.$2));
     }
   }
 }

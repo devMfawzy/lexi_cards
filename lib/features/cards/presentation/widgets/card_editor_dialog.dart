@@ -57,10 +57,7 @@ class _CardEditorDialogState extends State<CardEditorDialog> {
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(l10n.cancel),
-        ),
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l10n.cancel)),
         ElevatedButton(
           onPressed: () {
             final front = deltaJsonFromDocument(_frontController.document);

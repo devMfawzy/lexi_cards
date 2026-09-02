@@ -28,11 +28,7 @@ void main() {
   late MockGetCards getCards;
   late MockGetAllCards getAllCards;
 
-  Flashcard cardWith({
-    required String id,
-    CardState state = CardState.newCard,
-    DateTime? dueDate,
-  }) {
+  Flashcard cardWith({required String id, CardState state = CardState.newCard, DateTime? dueDate}) {
     return Flashcard(
       id: id,
       deckId: deckId,
@@ -61,11 +57,11 @@ void main() {
   });
 
   ReviewCubit buildCubit() => ReviewCubit(
-        getDueCards: getDueCards,
-        submitReviewUseCase: submitReview,
-        getCards: getCards,
-        getAllCardsUseCase: getAllCards,
-      );
+    getDueCards: getDueCards,
+    submitReviewUseCase: submitReview,
+    getCards: getCards,
+    getAllCardsUseCase: getAllCards,
+  );
 
   group('loadDueCards', () {
     blocTest<ReviewCubit, ReviewState>(
@@ -134,10 +130,7 @@ void main() {
         // Rate 'a' — not yet due again (10 min away), so it's held pending.
         await cubit.submitRating(Rating.again, now: createdAt);
         // Rate 'b' 15 minutes later (in-session elapsed time) — 'a' is now due.
-        await cubit.submitRating(
-          Rating.good,
-          now: createdAt.add(const Duration(minutes: 15)),
-        );
+        await cubit.submitRating(Rating.good, now: createdAt.add(const Duration(minutes: 15)));
       },
       verify: (cubit) {
         expect(cubit.state.queue.map((c) => c.id), ['a']);
@@ -194,10 +187,7 @@ void main() {
         await cubit.loadDueCards(deckId: deckId);
         await cubit.submitRating(Rating.again, now: createdAt); // holds 'a' (10m away)
         // Only 2 minutes have passed — 'a' still isn't due, 'b' just landed pending too.
-        await cubit.submitRating(
-          Rating.again,
-          now: createdAt.add(const Duration(minutes: 2)),
-        );
+        await cubit.submitRating(Rating.again, now: createdAt.add(const Duration(minutes: 2)));
       },
       verify: (cubit) {
         expect(cubit.state.queue.map((c) => c.id), ['c']);

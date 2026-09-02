@@ -32,9 +32,9 @@ class _StatsView extends StatelessWidget {
       body: BlocConsumer<StatsCubit, StatsState>(
         listener: (context, state) {
           if (state.errorMessage != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.errorMessage!)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
           }
         },
         builder: (context, state) {
@@ -43,10 +43,7 @@ class _StatsView extends StatelessWidget {
           }
           final stats = state.stats;
           if (stats == null || stats.totalCards == 0) {
-            return EmptyState(
-              icon: Icons.insights_outlined,
-              message: l10n.noStatsYet,
-            );
+            return EmptyState(icon: Icons.insights_outlined, message: l10n.noStatsYet);
           }
           return RefreshIndicator(
             onRefresh: () => context.read<StatsCubit>().load(),

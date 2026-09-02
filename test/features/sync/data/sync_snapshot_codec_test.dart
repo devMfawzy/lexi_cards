@@ -19,46 +19,43 @@ CardRecord card(
   int scheduleUpdatedAtMs = 1000,
   int dueDateMs = 1000,
   CardState state = CardState.review,
-}) =>
-    CardRecord(
-      id: id,
-      createdAtMs: createdAtMs,
-      deckId: 'deck-1',
-      front: 'front',
-      back: 'back',
-      contentUpdatedAtMs: contentUpdatedAtMs,
-      state: state,
-      dueDateMs: dueDateMs,
-      intervalDays: 7,
-      easeFactor: 2.5,
-      learningStepIndex: 0,
-      lapses: 1,
-      reviewCount: 4,
-      scheduleUpdatedAtMs: scheduleUpdatedAtMs,
-    );
+}) => CardRecord(
+  id: id,
+  createdAtMs: createdAtMs,
+  deckId: 'deck-1',
+  front: 'front',
+  back: 'back',
+  contentUpdatedAtMs: contentUpdatedAtMs,
+  state: state,
+  dueDateMs: dueDateMs,
+  intervalDays: 7,
+  easeFactor: 2.5,
+  learningStepIndex: 0,
+  lapses: 1,
+  reviewCount: 4,
+  scheduleUpdatedAtMs: scheduleUpdatedAtMs,
+);
 
 SyncSnapshot fullSnapshot() => SyncSnapshot(
-      exportedAtMs: 12345,
-      decks: const [
-        DeckRecord(id: 'deck-1', name: 'Español', createdAtMs: 900, contentUpdatedAtMs: 1500),
-      ],
-      cards: [card('card-1')],
-      logs: const [
-        LogRecord(
-          id: 'log-1',
-          cardId: 'card-1',
-          reviewedAtMs: 1200,
-          rating: Rating.hard,
-          previousIntervalDays: 1,
-          newIntervalDays: 3,
-          previousEaseFactor: 2.5,
-          newEaseFactor: 2.35,
-        ),
-      ],
-      tombstones: const [
-        TombstoneRecord(id: 'card-9', entityType: 'card', deletedAtMs: 1400),
-      ],
-    );
+  exportedAtMs: 12345,
+  decks: const [
+    DeckRecord(id: 'deck-1', name: 'Español', createdAtMs: 900, contentUpdatedAtMs: 1500),
+  ],
+  cards: [card('card-1')],
+  logs: const [
+    LogRecord(
+      id: 'log-1',
+      cardId: 'card-1',
+      reviewedAtMs: 1200,
+      rating: Rating.hard,
+      previousIntervalDays: 1,
+      newIntervalDays: 3,
+      previousEaseFactor: 2.5,
+      newEaseFactor: 2.35,
+    ),
+  ],
+  tombstones: const [TombstoneRecord(id: 'card-9', entityType: 'card', deletedAtMs: 1400)],
+);
 
 Uint8List gzipJson(Map<String, dynamic> json) =>
     Uint8List.fromList(gzip.encode(utf8.encode(jsonEncode(json))));
@@ -103,8 +100,9 @@ void main() {
     });
 
     test('every timestamp on the wire is an integer, never a formatted string', () {
-      final json = jsonDecode(utf8.decode(gzip.decode(SyncSnapshotCodec.encode(fullSnapshot()))))
-          as Map<String, dynamic>;
+      final json =
+          jsonDecode(utf8.decode(gzip.decode(SyncSnapshotCodec.encode(fullSnapshot()))))
+              as Map<String, dynamic>;
 
       final cardJson = (json['cards'] as List).single as Map<String, dynamic>;
       expect(cardJson['createdAtMs'], isA<int>());
@@ -118,16 +116,18 @@ void main() {
     test('enums are written by name, not by index', () {
       // Hive stores the index, which silently reinterprets every card if the
       // enum is ever reordered. The wire format must not inherit that.
-      final json = jsonDecode(utf8.decode(gzip.decode(SyncSnapshotCodec.encode(fullSnapshot()))))
-          as Map<String, dynamic>;
+      final json =
+          jsonDecode(utf8.decode(gzip.decode(SyncSnapshotCodec.encode(fullSnapshot()))))
+              as Map<String, dynamic>;
 
       expect(((json['cards'] as List).single as Map)['state'], 'review');
       expect(((json['logs'] as List).single as Map)['rating'], 'hard');
     });
 
     test('an unknown card state from a newer schema falls back instead of throwing', () {
-      final json = jsonDecode(utf8.decode(gzip.decode(SyncSnapshotCodec.encode(fullSnapshot()))))
-          as Map<String, dynamic>;
+      final json =
+          jsonDecode(utf8.decode(gzip.decode(SyncSnapshotCodec.encode(fullSnapshot()))))
+              as Map<String, dynamic>;
       ((json['cards'] as List).single as Map)['state'] = 'suspended';
 
       final decoded = SyncSnapshotCodec.decode(gzipJson(json));
@@ -136,8 +136,9 @@ void main() {
     });
 
     test('an unknown rating keeps the log rather than dropping the review', () {
-      final json = jsonDecode(utf8.decode(gzip.decode(SyncSnapshotCodec.encode(fullSnapshot()))))
-          as Map<String, dynamic>;
+      final json =
+          jsonDecode(utf8.decode(gzip.decode(SyncSnapshotCodec.encode(fullSnapshot()))))
+              as Map<String, dynamic>;
       ((json['logs'] as List).single as Map)['rating'] = 'skipped';
 
       final decoded = SyncSnapshotCodec.decode(gzipJson(json));
@@ -151,8 +152,9 @@ void main() {
     test('a snapshot from a newer schema is refused outright', () {
       // Decoding it would drop the fields this build doesn't know, and the
       // next upload would then delete them for the newer device too.
-      final json = jsonDecode(utf8.decode(gzip.decode(SyncSnapshotCodec.encode(fullSnapshot()))))
-          as Map<String, dynamic>;
+      final json =
+          jsonDecode(utf8.decode(gzip.decode(SyncSnapshotCodec.encode(fullSnapshot()))))
+              as Map<String, dynamic>;
       json['schemaVersion'] = SyncSnapshot.currentSchemaVersion + 1;
 
       expect(
@@ -178,8 +180,9 @@ void main() {
     });
 
     test('a missing required field is rejected rather than silently defaulted', () {
-      final json = jsonDecode(utf8.decode(gzip.decode(SyncSnapshotCodec.encode(fullSnapshot()))))
-          as Map<String, dynamic>;
+      final json =
+          jsonDecode(utf8.decode(gzip.decode(SyncSnapshotCodec.encode(fullSnapshot()))))
+              as Map<String, dynamic>;
       ((json['cards'] as List).single as Map).remove('reviewCount');
 
       expect(

@@ -6,12 +6,7 @@ class StatTile extends StatelessWidget {
   final String label;
   final String value;
 
-  const StatTile({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
+  const StatTile({super.key, required this.icon, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -27,18 +22,16 @@ class StatTile extends StatelessWidget {
             const SizedBox(height: 12),
             LtrText(
               value,
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineSmall
-                  ?.copyWith(fontWeight: FontWeight.w700),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 2),
             Text(
               label,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: colorScheme.onSurfaceVariant),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
             ),
           ],
         ),

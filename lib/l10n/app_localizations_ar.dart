@@ -114,8 +114,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get imagePlaceholder => '📷 صورة';
 
   @override
-  String get imageTooLarge =>
-      'هذه الصورة كبيرة جدًا لإضافتها إلى بطاقة. جرّب صورة أصغر.';
+  String get imageTooLarge => 'هذه الصورة كبيرة جدًا لإضافتها إلى بطاقة. جرّب صورة أصغر.';
 
   @override
   String get studyAllTitle => 'دراسة الكل';
@@ -175,8 +174,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get statsTitle => 'الإحصائيات';
 
   @override
-  String get noStatsYet =>
-      'لا توجد إحصائيات بعد. أضف بعض البطاقات وابدأ المراجعة.';
+  String get noStatsYet => 'لا توجد إحصائيات بعد. أضف بعض البطاقات وابدأ المراجعة.';
 
   @override
   String get dayStreak => 'أيام متتالية';
@@ -219,8 +217,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get testPermissionDenied => 'تم رفض إذن الإشعارات.';
 
   @override
-  String get testNotificationSent =>
-      'تم إرسال الإشعار التجريبي — يجب أن يصل خلال ثوانٍ قليلة.';
+  String get testNotificationSent => 'تم إرسال الإشعار التجريبي — يجب أن يصل خلال ثوانٍ قليلة.';
 
   @override
   String get languageTitle => 'اللغة';

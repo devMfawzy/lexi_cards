@@ -21,11 +21,7 @@ class DeckModel extends HiveObject {
   @HiveField(3)
   int? contentUpdatedAtMs;
 
-  Deck toEntity() => Deck(
-        id: id,
-        name: name,
-        createdAt: createdAt,
-      );
+  Deck toEntity() => Deck(id: id, name: name, createdAt: createdAt);
 
   static DeckModel fromEntity(Deck entity) => DeckModel()
     ..id = entity.id

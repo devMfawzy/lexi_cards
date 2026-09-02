@@ -113,12 +113,7 @@ void main() {
     });
 
     test('Again: lapses +1, ease -0.20, demotes to relearning', () {
-      final card = cardWith(
-        state: CardState.review,
-        intervalDays: 6,
-        easeFactor: 2.5,
-        lapses: 2,
-      );
+      final card = cardWith(state: CardState.review, intervalDays: 6, easeFactor: 2.5, lapses: 2);
       final result = computeNextSchedule(card, Rating.again, now: now);
       expect(result.newState, CardState.relearning);
       expect(result.newLapses, 3);
@@ -177,17 +172,11 @@ void main() {
     var result = computeNextSchedule(card, Rating.good, now: now);
     expect(result.newIntervalDays, 15);
 
-    card = card.copyWith(
-      intervalDays: result.newIntervalDays,
-      easeFactor: result.newEaseFactor,
-    );
+    card = card.copyWith(intervalDays: result.newIntervalDays, easeFactor: result.newEaseFactor);
     result = computeNextSchedule(card, Rating.good, now: now);
     expect(result.newIntervalDays, 38); // round(15 * 2.5) = 37.5 -> 38
 
-    card = card.copyWith(
-      intervalDays: result.newIntervalDays,
-      easeFactor: result.newEaseFactor,
-    );
+    card = card.copyWith(intervalDays: result.newIntervalDays, easeFactor: result.newEaseFactor);
     result = computeNextSchedule(card, Rating.good, now: now);
     expect(result.newIntervalDays, 95); // round(38 * 2.5) = 95
   });

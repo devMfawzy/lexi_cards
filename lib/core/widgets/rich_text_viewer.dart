@@ -22,10 +22,10 @@ class _RichTextViewerState extends State<RichTextViewer> {
   late QuillController _controller = _buildController(widget.stored);
 
   QuillController _buildController(String stored) => QuillController(
-        document: documentFromStored(stored),
-        selection: const TextSelection.collapsed(offset: 0),
-        readOnly: true,
-      );
+    document: documentFromStored(stored),
+    selection: const TextSelection.collapsed(offset: 0),
+    readOnly: true,
+  );
 
   @override
   void didUpdateWidget(covariant RichTextViewer oldWidget) {

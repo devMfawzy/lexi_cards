@@ -86,17 +86,17 @@ class Flashcard extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        deckId,
-        front,
-        back,
-        createdAt,
-        state,
-        dueDate,
-        intervalDays,
-        easeFactor,
-        learningStepIndex,
-        lapses,
-        reviewCount,
-      ];
+    id,
+    deckId,
+    front,
+    back,
+    createdAt,
+    state,
+    dueDate,
+    intervalDays,
+    easeFactor,
+    learningStepIndex,
+    lapses,
+    reviewCount,
+  ];
 }

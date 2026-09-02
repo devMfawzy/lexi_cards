@@ -8,11 +8,7 @@ class RatingButtons extends StatelessWidget {
   final Map<Rating, Duration> previews;
   final ValueChanged<Rating> onRate;
 
-  const RatingButtons({
-    super.key,
-    required this.previews,
-    required this.onRate,
-  });
+  const RatingButtons({super.key, required this.previews, required this.onRate});
 
   static const _colors = {
     Rating.again: RatingColors.again,
@@ -62,10 +58,7 @@ class RatingButtons extends StatelessWidget {
                 children: [
                   Text(_label(l10n, rating), style: const TextStyle(fontWeight: FontWeight.w700)),
                   if (preview != null)
-                    LtrText(
-                      _format(l10n, preview),
-                      style: const TextStyle(fontSize: 11),
-                    ),
+                    LtrText(_format(l10n, preview), style: const TextStyle(fontSize: 11)),
                 ],
               ),
             ),

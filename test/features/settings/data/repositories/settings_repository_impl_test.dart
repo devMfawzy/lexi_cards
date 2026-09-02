@@ -28,7 +28,9 @@ void main() {
   });
 
   test('persists across repository instances backed by the same prefs store', () async {
-    await repository.saveReminderSettings(const ReminderSettings(enabled: true, hour: 7, minute: 45));
+    await repository.saveReminderSettings(
+      const ReminderSettings(enabled: true, hour: 7, minute: 45),
+    );
 
     final second = SettingsRepositoryImpl(localDataSource: SettingsLocalDataSourceImpl());
     final loaded = await second.getReminderSettings();

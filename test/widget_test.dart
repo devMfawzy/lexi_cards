@@ -38,14 +38,15 @@ void main() {
 
   tearDown(() => getIt.reset());
 
-  testWidgets('Decks page shows empty state when there are no decks',
-      (tester) async {
-    await tester.pumpWidget(const MaterialApp(
-      locale: Locale('en'),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: DecksPage(),
-    ));
+  testWidgets('Decks page shows empty state when there are no decks', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        locale: Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: DecksPage(),
+      ),
+    );
     await tester.pump();
 
     expect(find.text('My Decks'), findsOneWidget);

@@ -28,14 +28,8 @@ class DeckListTile extends StatelessWidget {
         title: Text(l10n.deleteDeckTitle),
         content: Text(l10n.deleteDeckBody(summary.deck.name)),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.delete),
-          ),
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(l10n.cancel)),
+          FilledButton(onPressed: () => Navigator.of(context).pop(true), child: Text(l10n.delete)),
         ],
       ),
     );
@@ -122,9 +116,9 @@ class DeckListTile extends StatelessWidget {
                       children: [
                         Text(
                           summary.deck.name,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
                         ),
                         const SizedBox(height: 8),
                         Row(

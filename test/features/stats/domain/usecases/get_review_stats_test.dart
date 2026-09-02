@@ -133,10 +133,7 @@ void main() {
     });
 
     test('is 1.0 when no review was rated again', () async {
-      final logs = [
-        logOn(now, rating: Rating.good),
-        logOn(now, rating: Rating.easy),
-      ];
+      final logs = [logOn(now, rating: Rating.good), logOn(now, rating: Rating.easy)];
       when(() => repository.getAllReviewLogs()).thenAnswer((_) async => logs);
       final stats = await getReviewStats(now: now);
       expect(stats.retentionRate, 1.0);

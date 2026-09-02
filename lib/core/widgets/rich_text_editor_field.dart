@@ -14,11 +14,7 @@ class RichTextEditorField extends StatefulWidget {
   final QuillController controller;
   final String label;
 
-  const RichTextEditorField({
-    super.key,
-    required this.controller,
-    required this.label,
-  });
+  const RichTextEditorField({super.key, required this.controller, required this.label});
 
   @override
   State<RichTextEditorField> createState() => _RichTextEditorFieldState();
@@ -47,9 +43,9 @@ class _RichTextEditorFieldState extends State<RichTextEditorField> {
       // Refusing is the honest outcome: the image lives inline in the card,
       // so silently inlining an oversized one would bloat the record itself.
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.imageTooLarge)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.imageTooLarge)));
       return;
     }
     final index = controller.selection.baseOffset;
@@ -76,10 +72,9 @@ class _RichTextEditorFieldState extends State<RichTextEditorField> {
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
             child: Text(
               widget.label,
-              style: Theme.of(context)
-                  .textTheme
-                  .labelMedium
-                  ?.copyWith(color: colorScheme.onSurfaceVariant),
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(color: colorScheme.onSurfaceVariant),
             ),
           ),
           QuillSimpleToolbar(

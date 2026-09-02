@@ -9,12 +9,7 @@ class CardListTile extends StatelessWidget {
   final VoidCallback onDelete;
   final VoidCallback onTap;
 
-  const CardListTile({
-    super.key,
-    required this.card,
-    required this.onDelete,
-    required this.onTap,
-  });
+  const CardListTile({super.key, required this.card, required this.onDelete, required this.onTap});
 
   String _stateLabel(AppLocalizations l10n, CardState state) {
     switch (state) {
@@ -49,14 +44,8 @@ class CardListTile extends StatelessWidget {
         title: Text(l10n.deleteCardTitle),
         content: Text(l10n.deleteCardBody),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.delete),
-          ),
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(l10n.cancel)),
+          FilledButton(onPressed: () => Navigator.of(context).pop(true), child: Text(l10n.delete)),
         ],
       ),
     );
@@ -94,10 +83,14 @@ class CardListTile extends StatelessWidget {
               padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 16, 16),
               child: Row(
                 children: [
-                  Container(width: 4, height: 40, decoration: BoxDecoration(
-                    color: stateColor,
-                    borderRadius: BorderRadius.circular(2),
-                  )),
+                  Container(
+                    width: 4,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: stateColor,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
@@ -105,16 +98,18 @@ class CardListTile extends StatelessWidget {
                       children: [
                         Text(
                           cardPreviewLabel(card.front, imagePlaceholder: l10n.imagePlaceholder),
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
                         Text(
                           cardPreviewLabel(card.back, imagePlaceholder: l10n.imagePlaceholder),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -124,7 +119,11 @@ class CardListTile extends StatelessWidget {
                   const SizedBox(width: 8),
                   Chip(
                     label: Text(_stateLabel(l10n, card.state)),
-                    labelStyle: TextStyle(color: stateColor, fontSize: 12, fontWeight: FontWeight.w600),
+                    labelStyle: TextStyle(
+                      color: stateColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
                     backgroundColor: stateColor.withValues(alpha: 0.12),
                   ),
                 ],

@@ -19,11 +19,9 @@ class RemoteSnapshot {
   const RemoteSnapshot({required this.bytes, required this.revision});
 }
 
-/// The remote moved while we were merging against it.
-///
-/// Two devices syncing at once both download the same snapshot, both merge,
-/// and both upload — without this check the second silently discards the
-/// first's contributions. The caller re-downloads, merges again, and retries.
+/// The remote moved while we were merging against it. Without this check, two
+/// devices syncing at once would have the second silently discard the first's
+/// work. The caller re-downloads, merges again, and retries.
 class RemoteChangedException implements Exception {
   const RemoteChangedException();
 
@@ -41,16 +39,13 @@ class NotLinkedException implements Exception {
 
 /// Somewhere to keep one file.
 ///
-/// Deliberately this small. The cloud does no merging — it stores a blob and
-/// tells us whether it changed — so everything that decides *what the data
-/// should be* stays in pure Dart above this line, where it can be tested
-/// without a network or an account.
+/// Deliberately this small: the cloud stores a blob and reports whether it
+/// changed, so everything deciding *what the data should be* stays in pure
+/// Dart above this line, testable without a network or an account.
 ///
-/// This is an interface rather than the concrete-class-with-injected-plugin
-/// shape used by `NotificationService`, because there is real polymorphism
-/// here and not just a seam for tests: the system file picker and iCloud are
-/// both plausible second implementations, and the sync logic above shouldn't
-/// have to know which one it's talking to.
+/// An interface rather than `NotificationService`'s concrete-class shape
+/// because there is real polymorphism here — the system file picker and iCloud
+/// are both plausible second implementations.
 abstract class CloudStorage {
   /// The account linked right now, if any, without going to the network.
   CloudAccount? get currentAccount;
@@ -68,10 +63,8 @@ abstract class CloudStorage {
   /// The stored snapshot, or null if this account has never synced.
   Future<RemoteSnapshot?> download();
 
-  /// Replaces the stored snapshot.
-  ///
-  /// [expectedRevision] is the revision the merge was based on; null means
-  /// "there was nothing there". Throws [RemoteChangedException] if the remote
-  /// has moved on since.
+  /// Replaces the stored snapshot. [expectedRevision] is what the merge was
+  /// based on (null meaning "nothing was there"); throws
+  /// [RemoteChangedException] if the remote has moved on since.
   Future<String> upload(Uint8List bytes, {required String? expectedRevision});
 }

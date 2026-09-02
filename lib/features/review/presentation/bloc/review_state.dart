@@ -51,12 +51,12 @@ class ReviewState extends Equatable {
 
   @override
   List<Object?> get props => [
-        queue,
-        pendingRequeue,
-        showAnswer,
-        reviewedCount,
-        isLoading,
-        errorMessage,
-        previews,
-      ];
+    queue,
+    pendingRequeue,
+    showAnswer,
+    reviewedCount,
+    isLoading,
+    errorMessage,
+    previews,
+  ];
 }

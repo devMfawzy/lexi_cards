@@ -6,17 +6,9 @@ class StatsState extends Equatable {
   final ReviewStats? stats;
   final String? errorMessage;
 
-  const StatsState({
-    this.isLoading = false,
-    this.stats,
-    this.errorMessage,
-  });
+  const StatsState({this.isLoading = false, this.stats, this.errorMessage});
 
-  StatsState copyWith({
-    bool? isLoading,
-    ReviewStats? stats,
-    String? errorMessage,
-  }) {
+  StatsState copyWith({bool? isLoading, ReviewStats? stats, String? errorMessage}) {
     return StatsState(
       isLoading: isLoading ?? this.isLoading,
       stats: stats ?? this.stats,

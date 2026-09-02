@@ -4,10 +4,8 @@ import '../../domain/repositories/sync_repository.dart';
 
 enum SyncStatus { idle, working }
 
-/// Known, translatable outcomes. Kept as an enum rather than a literal string
-/// because the cubit has no `BuildContext` and can't reach `AppLocalizations`
-/// — the page turns this into text when it builds the SnackBar. Matches how
-/// `SettingsFeedback` already works.
+/// Translatable outcomes as an enum, since the cubit has no `BuildContext` to
+/// localize with. Same pattern as `SettingsFeedback`.
 enum SyncFeedback {
   linked,
   unlinked,
@@ -41,8 +39,7 @@ class SyncState extends Equatable {
 
   bool get isLinked => accountEmail != null;
 
-  /// [feedback], [errorMessage] and [outcome] are assigned unconditionally
-  /// rather than falling back to the current value: they're transient, and
+  /// [feedback], [errorMessage] and [outcome] are assigned unconditionally —
   /// carrying them forward would re-fire the message on the next state change.
   SyncState copyWith({
     SyncStatus? status,
@@ -52,17 +49,15 @@ class SyncState extends Equatable {
     SyncFeedback? feedback,
     String? errorMessage,
     SyncOutcome? outcome,
-  }) =>
-      SyncState(
-        status: status ?? this.status,
-        accountEmail: clearAccount ? null : (accountEmail ?? this.accountEmail),
-        lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
-        feedback: feedback,
-        errorMessage: errorMessage,
-        outcome: outcome,
-      );
+  }) => SyncState(
+    status: status ?? this.status,
+    accountEmail: clearAccount ? null : (accountEmail ?? this.accountEmail),
+    lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
+    feedback: feedback,
+    errorMessage: errorMessage,
+    outcome: outcome,
+  );
 
   @override
-  List<Object?> get props =>
-      [status, accountEmail, lastSyncedAt, feedback, errorMessage, outcome];
+  List<Object?> get props => [status, accountEmail, lastSyncedAt, feedback, errorMessage, outcome];
 }

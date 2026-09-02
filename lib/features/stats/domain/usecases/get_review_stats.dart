@@ -75,9 +75,7 @@ class GetReviewStats {
 
   List<DailyCount> _dueNext7Days(List<Flashcard> cards, DateTime now) {
     final today = _dateOnly(now);
-    final counts = <DateTime, int>{
-      for (var i = 0; i < 7; i++) today.add(Duration(days: i)): 0,
-    };
+    final counts = <DateTime, int>{for (var i = 0; i < 7; i++) today.add(Duration(days: i)): 0};
     for (final card in cards) {
       if (card.state == CardState.newCard) continue;
       final due = _dateOnly(card.dueDate);

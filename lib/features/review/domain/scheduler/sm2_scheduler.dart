@@ -18,12 +18,7 @@ SchedulingResult computeNextSchedule(
   return _learningPhase(card, rating, effectiveNow, config);
 }
 
-SchedulingResult _learningPhase(
-  Flashcard card,
-  Rating rating,
-  DateTime now,
-  Sm2Config config,
-) {
+SchedulingResult _learningPhase(Flashcard card, Rating rating, DateTime now, Sm2Config config) {
   final isRelearning = card.state == CardState.relearning;
   final steps = isRelearning ? config.relearningSteps : config.learningSteps;
   final activeState = isRelearning ? CardState.relearning : CardState.learning;
@@ -54,8 +49,9 @@ SchedulingResult _learningPhase(
     case Rating.good:
       final nextIndex = card.learningStepIndex + 1;
       if (nextIndex >= steps.length) {
-        final gradInterval =
-            isRelearning ? config.minimumIntervalDays : config.graduatingIntervalDays;
+        final gradInterval = isRelearning
+            ? config.minimumIntervalDays
+            : config.graduatingIntervalDays;
         return SchedulingResult(
           newState: CardState.review,
           newDueDate: now.add(Duration(days: gradInterval)),
@@ -89,12 +85,7 @@ SchedulingResult _learningPhase(
   }
 }
 
-SchedulingResult _reviewPhase(
-  Flashcard card,
-  Rating rating,
-  DateTime now,
-  Sm2Config config,
-) {
+SchedulingResult _reviewPhase(Flashcard card, Rating rating, DateTime now, Sm2Config config) {
   switch (rating) {
     case Rating.again:
       final newEase = max(config.minEase, card.easeFactor + config.againEaseDelta);

@@ -22,12 +22,12 @@ class SchedulingResult extends Equatable {
 
   @override
   List<Object?> get props => [
-        newState,
-        newDueDate,
-        newIntervalDays,
-        newEaseFactor,
-        newLearningStepIndex,
-        newLapses,
-        newReviewCount,
-      ];
+    newState,
+    newDueDate,
+    newIntervalDays,
+    newEaseFactor,
+    newLearningStepIndex,
+    newLapses,
+    newReviewCount,
+  ];
 }

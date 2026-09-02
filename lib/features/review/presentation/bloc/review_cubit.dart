@@ -27,12 +27,9 @@ class ReviewCubit extends Cubit<ReviewState> {
     emit(state.copyWith(isLoading: true, errorMessage: null));
     try {
       final cards = await getDueCards(deckId: deckId);
-      emit(state.copyWith(
-        queue: cards,
-        pendingRequeue: const [],
-        isLoading: false,
-        showAnswer: false,
-      ));
+      emit(
+        state.copyWith(queue: cards, pendingRequeue: const [], isLoading: false, showAnswer: false),
+      );
       _computePreviews();
     } catch (e) {
       emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
@@ -58,19 +55,20 @@ class ReviewCubit extends Cubit<ReviewState> {
       final remaining = state.queue.skip(1).toList();
       final pending = [
         ...state.pendingRequeue,
-        if (updated.state == CardState.learning || updated.state == CardState.relearning)
-          updated,
+        if (updated.state == CardState.learning || updated.state == CardState.relearning) updated,
       ];
       final due = pending.where((c) => !c.dueDate.isAfter(effectiveNow)).toList()
         ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
       final stillPending = pending.where((c) => c.dueDate.isAfter(effectiveNow)).toList();
 
-      emit(state.copyWith(
-        queue: [...remaining, ...due],
-        pendingRequeue: stillPending,
-        showAnswer: false,
-        reviewedCount: state.reviewedCount + 1,
-      ));
+      emit(
+        state.copyWith(
+          queue: [...remaining, ...due],
+          pendingRequeue: stillPending,
+          showAnswer: false,
+          reviewedCount: state.reviewedCount + 1,
+        ),
+      );
       _computePreviews();
     } catch (e) {
       emit(state.copyWith(errorMessage: e.toString()));
@@ -85,18 +83,15 @@ class ReviewCubit extends Cubit<ReviewState> {
     final cards = deckId == null ? await getAllCardsUseCase() : await getCards(deckId);
     final simulatedNow = DateTime.now().add(by);
 
-    final due = cards
-        .where((c) => c.state != CardState.newCard && !c.dueDate.isAfter(simulatedNow))
-        .toList()
-      ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
+    final due =
+        cards
+            .where((c) => c.state != CardState.newCard && !c.dueDate.isAfter(simulatedNow))
+            .toList()
+          ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
     final newCards = cards.where((c) => c.state == CardState.newCard).toList()
       ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
-    emit(state.copyWith(
-      queue: [...due, ...newCards],
-      pendingRequeue: const [],
-      showAnswer: false,
-    ));
+    emit(state.copyWith(queue: [...due, ...newCards], pendingRequeue: const [], showAnswer: false));
     _computePreviews();
   }
 

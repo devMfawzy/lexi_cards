@@ -5,11 +5,7 @@ class ReminderSettings extends Equatable {
   final int hour;
   final int minute;
 
-  const ReminderSettings({
-    required this.enabled,
-    required this.hour,
-    required this.minute,
-  });
+  const ReminderSettings({required this.enabled, required this.hour, required this.minute});
 
   static const disabled = ReminderSettings(enabled: false, hour: 9, minute: 0);
 

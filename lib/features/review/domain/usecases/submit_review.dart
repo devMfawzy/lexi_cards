@@ -26,16 +26,18 @@ class SubmitReview {
     );
 
     await repository.updateCardSchedule(updated);
-    await repository.addReviewLog(ReviewLog(
-      id: _uuid.v4(),
-      cardId: cardId,
-      reviewedAt: DateTime.now(),
-      rating: rating,
-      previousIntervalDays: card.intervalDays,
-      newIntervalDays: result.newIntervalDays,
-      previousEaseFactor: card.easeFactor,
-      newEaseFactor: result.newEaseFactor,
-    ));
+    await repository.addReviewLog(
+      ReviewLog(
+        id: _uuid.v4(),
+        cardId: cardId,
+        reviewedAt: DateTime.now(),
+        rating: rating,
+        previousIntervalDays: card.intervalDays,
+        newIntervalDays: result.newIntervalDays,
+        previousEaseFactor: card.easeFactor,
+        newEaseFactor: result.newEaseFactor,
+      ),
+    );
 
     return updated;
   }

@@ -11,7 +11,7 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _plugin;
 
   NotificationService({FlutterLocalNotificationsPlugin? plugin})
-      : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
+    : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
 
   static const dailyReminderId = 1;
   static const testNotificationId = 2;
@@ -87,13 +87,13 @@ class NotificationService {
   }
 
   NotificationDetails _notificationDetails() => const NotificationDetails(
-        android: AndroidNotificationDetails(
-          _channelId,
-          _channelName,
-          channelDescription: _channelDescription,
-        ),
-        iOS: DarwinNotificationDetails(),
-      );
+    android: AndroidNotificationDetails(
+      _channelId,
+      _channelName,
+      channelDescription: _channelDescription,
+    ),
+    iOS: DarwinNotificationDetails(),
+  );
 
   tz.TZDateTime _nextInstanceOfTime(int hour, int minute) {
     final now = tz.TZDateTime.now(tz.local);

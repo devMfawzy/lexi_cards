@@ -4,24 +4,17 @@ import '../models/flashcard_model.dart';
 import '../models/review_log_model.dart';
 import '../models/tombstone_model.dart';
 
-/// Which of a record's modification clocks a write should advance.
-///
-/// Required (not defaulted) at every call site on purpose: forgetting to say
-/// won't compile, whereas a default would let a new write path silently pick
-/// the wrong clock and corrupt merge ordering in a way no test would notice.
+/// Which modification clock a write advances. Required at every call site so a
+/// new write path can't silently pick the wrong one.
 enum WriteKind {
-  /// The user changed what the record *says* — a card's front/back, a deck's
-  /// name. Advances the content clock only.
+  /// The user changed what the record says.
   content,
 
-  /// The scheduler changed when the card is next due. Advances the schedule
-  /// clock only, so a review never looks like a content edit.
+  /// The scheduler changed when a card is next due.
   schedule,
 
-  /// Write the clocks exactly as supplied. Used only when applying a merge:
-  /// the incoming record's own timestamps have to survive intact, because
-  /// re-stamping them to `now` would mark every synced record freshly
-  /// modified and stop the two devices from ever converging.
+  /// Write the clocks exactly as supplied. Merge-apply only: re-stamping them
+  /// would mark every synced record freshly modified and prevent convergence.
   verbatim,
 }
 
@@ -60,18 +53,15 @@ class LocalDataSourceImpl implements LocalDataSource {
   static const String _reviewLogsBox = 'review_logs';
   static const String _tombstonesBox = 'tombstones';
 
-  /// Injectable so tests can pin the modification clocks they assert on,
-  /// matching how `GetReviewStats` takes its own `now`.
+  /// Injectable so tests can pin the clocks they assert on.
   final DateTime Function() _now;
 
   LocalDataSourceImpl({DateTime Function()? now}) : _now = now ?? DateTime.now;
 
   Future<Box<DeckModel>> get _decks => Hive.openBox<DeckModel>(_decksBox);
   Future<Box<FlashcardModel>> get _cards => Hive.openBox<FlashcardModel>(_cardsBox);
-  Future<Box<ReviewLogModel>> get _reviewLogs =>
-      Hive.openBox<ReviewLogModel>(_reviewLogsBox);
-  Future<Box<TombstoneModel>> get _tombstones =>
-      Hive.openBox<TombstoneModel>(_tombstonesBox);
+  Future<Box<ReviewLogModel>> get _reviewLogs => Hive.openBox<ReviewLogModel>(_reviewLogsBox);
+  Future<Box<TombstoneModel>> get _tombstones => Hive.openBox<TombstoneModel>(_tombstonesBox);
 
   int get _nowMs => _now().millisecondsSinceEpoch;
 
@@ -102,13 +92,10 @@ class LocalDataSourceImpl implements LocalDataSource {
     final cardsBox = await _cards;
     final cardIds = cardsBox.values.where((c) => c.deckId == id).map((c) => c.id).toList();
 
-    // Order matters, and it isn't the obvious one. Hive has no cross-box
-    // transaction, so this can be interrupted partway; deleting the deck first
-    // would leave its cards behind with a deckId pointing at nothing — cards
-    // that show up in no deck, yet still surface in "study all decks" and in
-    // the stats totals, with no way to reach them. Recording the intent first
-    // and removing the children before the parent means every interruption
-    // point leaves a state that is merely stale, never corrupt.
+    // Intent first, then children, then parent. Hive has no cross-box
+    // transaction, and deleting the deck first would strand its cards with a
+    // deckId pointing at nothing — invisible, but still served by "study all".
+    // This order leaves every interruption point merely stale.
     await _writeTombstone(id: id, entityType: TombstoneEntity.deck);
     await cardsBox.deleteAll(cardIds);
     final box = await _decks;
@@ -131,11 +118,9 @@ class LocalDataSourceImpl implements LocalDataSource {
   Future<FlashcardModel> saveCard(FlashcardModel model, {required WriteKind kind}) async {
     final box = await _cards;
     if (kind != WriteKind.verbatim) {
-      // The model handed in was rebuilt from a domain entity, which carries
-      // neither clock — so the clock this write isn't advancing has to be
-      // carried over from what's already stored, or a content edit would
-      // silently erase the record of when the card was last reviewed. A
-      // record that doesn't exist yet has both established now.
+      // Models are rebuilt from entities on every write and so arrive with no
+      // clocks; the one this write isn't advancing must be carried over, or a
+      // content edit would erase when the card was last reviewed.
       final stored = box.get(model.id);
       final nowMs = _nowMs;
       model
@@ -196,16 +181,12 @@ class LocalDataSourceImpl implements LocalDataSource {
     required List<String> deletedCardIds,
     required List<String> deletedDeckIds,
   }) async {
-    // Hive has no transaction spanning boxes, so this will sometimes be
-    // interrupted partway. The order is chosen so that every point it can stop
-    // at leaves a database that is merely stale rather than wrong: intent is
-    // recorded first, additions land before removals, and children are removed
-    // before their parents. Re-running the sync repairs whatever was missed.
+    // Same ordering rule as deleteDeck: intent, then additions, then removals,
+    // children before parents. Re-running the sync repairs any interruption.
     //
-    // Deletions here go straight to the box rather than through deleteCard /
-    // deleteDeck, because those record a *new* tombstone stamped now — which
-    // would overwrite the real deletion time coming from the other device and
-    // let the record resurrect itself on the next merge.
+    // Deletes go straight to the box rather than through deleteCard/deleteDeck,
+    // which would stamp a *new* tombstone and overwrite the real deletion time
+    // from the other device — letting the record resurrect on the next merge.
     final tombstoneBox = await _tombstones;
     await tombstoneBox.putAll({for (final t in tombstones) t.storageKey: t});
 
@@ -224,11 +205,7 @@ class LocalDataSourceImpl implements LocalDataSource {
 
   Future<void> _writeTombstone({required String id, required String entityType}) async {
     final box = await _tombstones;
-    final tombstone = TombstoneModel.of(
-      id: id,
-      entityType: entityType,
-      deletedAtMs: _nowMs,
-    );
+    final tombstone = TombstoneModel.of(id: id, entityType: entityType, deletedAtMs: _nowMs);
     await box.put(tombstone.storageKey, tombstone);
   }
 }

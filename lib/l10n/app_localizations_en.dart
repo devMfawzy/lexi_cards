@@ -114,8 +114,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get imagePlaceholder => '📷 Image';
 
   @override
-  String get imageTooLarge =>
-      'That image is too large to add to a card. Try a smaller one.';
+  String get imageTooLarge => 'That image is too large to add to a card. Try a smaller one.';
 
   @override
   String get studyAllTitle => 'Study All';
@@ -214,8 +213,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get testPermissionDenied => 'Notifications permission was denied.';
 
   @override
-  String get testNotificationSent =>
-      'Test notification sent — it should arrive in a few seconds.';
+  String get testNotificationSent => 'Test notification sent — it should arrive in a few seconds.';
 
   @override
   String get languageTitle => 'Language';
@@ -287,8 +285,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncNeedsAccount => 'Connect a Google account first.';
 
   @override
-  String get syncRemoteBusy =>
-      'Another device is syncing right now. Try again in a moment.';
+  String get syncRemoteBusy => 'Another device is syncing right now. Try again in a moment.';
 
   @override
   String get syncSnapshotTooNew =>

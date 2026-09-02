@@ -6,17 +6,9 @@ class CardsState extends Equatable {
   final bool isLoading;
   final String? errorMessage;
 
-  const CardsState({
-    this.cards = const [],
-    this.isLoading = false,
-    this.errorMessage,
-  });
+  const CardsState({this.cards = const [], this.isLoading = false, this.errorMessage});
 
-  CardsState copyWith({
-    List<Flashcard>? cards,
-    bool? isLoading,
-    String? errorMessage,
-  }) {
+  CardsState copyWith({List<Flashcard>? cards, bool? isLoading, String? errorMessage}) {
     return CardsState(
       cards: cards ?? this.cards,
       isLoading: isLoading ?? this.isLoading,

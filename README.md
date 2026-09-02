@@ -1,5 +1,7 @@
 # lexi_cards
 
+[![CI](https://github.com/devMfawzy/lexi_cards/actions/workflows/ci.yml/badge.svg)](https://github.com/devMfawzy/lexi_cards/actions/workflows/ci.yml)
+
 A spaced-repetition flashcard app, Anki-style, built in Flutter. You create decks, add cards, and review them on a schedule driven by the SM-2 algorithm — the same family of algorithm Anki and SuperMemo use. Rate a card Again/Hard/Good/Easy and the app decides when you'll see it next.
 
 I built this as a portfolio piece to show a complete, non-trivial Flutter app: clean architecture, BLoC state management, local persistence, and a scheduling algorithm with actual logic worth unit testing — not just CRUD screens.
@@ -37,7 +39,7 @@ The due-card selection (bucket by learning/review/new, sort each bucket) is deck
 
 Card front/back are still plain `String` fields in Hive — rich text is Quill Delta JSON stored in that same string. `core/rich_text/quill_content.dart` converts between the two and falls back to treating unparseable content as plain text, so cards created before rich text existed keep working with no data migration. An image is just another embed op in that same Delta, base64-inlined — accepted tradeoff: the Hive box grows for image-heavy decks, in exchange for no file-cleanup lifecycle to get wrong on card/deck delete. Because an image lives *inside* the card record, an uncapped image means an uncapped card. So a picked image is decoded and re-encoded (JPEG for opaque photos, PNG only when the source actually has transparency) against a hard byte ceiling, walking down a ladder of sizes — 1600px, 1200, 900, 640 — until the result fits. All of it runs through `compute()`, since decode/resize/encode on a full-resolution photo is real CPU work. Two cases fall off the end of that ladder: a transparent image PNG simply can't compress far enough gets flattened onto white so JPEG can finish the job, and an image that can't be decoded *and* is already over the ceiling is refused with a message rather than silently inlined.
 
-Worth correcting a plausible-sounding assumption here, because I shipped it in this README before checking: it is tempting to say HEIC — the iOS camera default — bypasses all of this, since the `image` package can't decode it. On iOS it never arrives. `image_picker` sniffs the leading byte, and anything it doesn't recognise falls through to `UIImageJPEGRepresentation`, so a HEIC pick reaches Dart already converted to JPEG. The undecodable path is really an *Android* path: there, the picked file is handed back untouched unless a quality or size limit was requested, and Quill requests neither.
+The undecodable case is an Android one, not the iOS one it looks like: `image_picker` on iOS sniffs the leading byte and re-encodes anything it doesn't recognise — HEIC included — to JPEG before Dart sees it. Android hands the picked file back untouched unless a quality or size limit was requested, and Quill requests neither.
 
 Two real bugs worth calling out because they're the kind that only show up once you actually use the feature, not from reading the diff: `Document.toPlainText()` doesn't cover embeds, so an image-only card used to read as blank and get silently rejected by the save button (`isContentBlank` now also checks for embed ops directly). And every embed builder rebuild re-decoded the base64 payload into a fresh `MemoryImage` — since `MemoryImage` has no content-based equality, that meant a visible re-decode flicker on every keystroke while editing (`core/widgets/quill_image_provider_cache.dart` caches by source string to fix it).
 
@@ -89,7 +91,13 @@ flutter pub get
 flutter run
 ```
 
-Runs on iOS, Android, and web — no platform-specific setup beyond the usual Flutter toolchain.
+Runs on iOS and Android. Sync additionally needs OAuth clients registered in a Google Cloud project — a one-time setup written up in [`docs/google-cloud-setup.md`](docs/google-cloud-setup.md). Everything else works without it.
+
+The app icon is generated rather than checked in as an opaque binary:
+
+```
+dart run tool/generate_app_icon.dart && dart run flutter_launcher_icons
+```
 
 ## Tests
 

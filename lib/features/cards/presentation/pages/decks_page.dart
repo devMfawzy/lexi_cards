@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -52,9 +54,9 @@ class _DecksView extends StatelessWidget {
       body: BlocConsumer<DecksCubit, DecksState>(
         listener: (context, state) {
           if (state.errorMessage != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.errorMessage!)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
           }
         },
         builder: (context, state) {
@@ -62,10 +64,7 @@ class _DecksView extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (state.summaries.isEmpty) {
-            return EmptyState(
-              icon: Icons.style_outlined,
-              message: l10n.noDecksYet,
-            );
+            return EmptyState(icon: Icons.style_outlined, message: l10n.noDecksYet);
           }
           final totalDue = state.summaries.fold<int>(0, (sum, s) => sum + s.dueCount);
           return RefreshIndicator(
@@ -75,10 +74,7 @@ class _DecksView extends StatelessWidget {
               itemCount: state.summaries.length + 1,
               itemBuilder: (context, index) {
                 if (index == 0) {
-                  return _StudyAllHeader(
-                    dueCount: totalDue,
-                    onTap: () => context.push('/study'),
-                  );
+                  return _StudyAllHeader(dueCount: totalDue, onTap: () => context.push('/study'));
                 }
                 final summary = state.summaries[index - 1];
                 return DeckListTile(
@@ -101,7 +97,7 @@ class _DecksView extends StatelessWidget {
             builder: (_) => const DeckNameDialog(),
           );
           if (name != null) {
-            cubit.createDeck(name);
+            unawaited(cubit.createDeck(name));
           }
         },
         child: const Icon(Icons.add),
@@ -138,22 +134,26 @@ class _StudyAllHeader extends StatelessWidget {
                       Text(
                         l10n.studyAllDecksHeader,
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: colorScheme.onPrimaryContainer,
-                            ),
+                          fontWeight: FontWeight.w700,
+                          color: colorScheme.onPrimaryContainer,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         l10n.dueCount(dueCount),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onPrimaryContainer,
-                            ),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: colorScheme.onPrimaryContainer),
                       ),
                     ],
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.play_circle_fill, color: colorScheme.onPrimaryContainer, size: 36),
+                  icon: Icon(
+                    Icons.play_circle_fill,
+                    color: colorScheme.onPrimaryContainer,
+                    size: 36,
+                  ),
                   tooltip: l10n.studyAllDecksHeader,
                   onPressed: onTap,
                 ),

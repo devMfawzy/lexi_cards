@@ -7,12 +7,7 @@ class MiniBarChart extends StatelessWidget {
   final List<DailyCount> data;
   final Color color;
 
-  const MiniBarChart({
-    super.key,
-    required this.title,
-    required this.data,
-    required this.color,
-  });
+  const MiniBarChart({super.key, required this.title, required this.data, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +27,7 @@ class MiniBarChart extends StatelessWidget {
           children: [
             Text(
               title,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(fontWeight: FontWeight.w700),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 20),
             Row(
@@ -60,10 +52,9 @@ class MiniBarChart extends StatelessWidget {
                           const SizedBox(height: 6),
                           Text(
                             weekdayFormat.format(d.date),
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall
-                                ?.copyWith(color: colorScheme.onSurfaceVariant),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant),
                           ),
                         ],
                       ),

@@ -6,8 +6,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 import 'package:lexi_cards/core/notifications/notification_service.dart';
 
-class MockFlutterLocalNotificationsPlugin extends Mock
-    implements FlutterLocalNotificationsPlugin {}
+class MockFlutterLocalNotificationsPlugin extends Mock implements FlutterLocalNotificationsPlugin {}
 
 void main() {
   late MockFlutterLocalNotificationsPlugin plugin;

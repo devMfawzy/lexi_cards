@@ -41,21 +41,13 @@ class FlashcardModel extends HiveObject {
   @HiveField(11)
   late int reviewCount;
 
-  /// When this card's *content* (front/back/deck) last changed, and when its
-  /// *scheduling* last changed, as epoch milliseconds.
+  /// When the card's content and its scheduling last changed, in epoch
+  /// milliseconds. Two clocks rather than one `updatedAt`: a card is edited and
+  /// reviewed independently, and a single clock forces a merge to discard one.
   ///
-  /// Two separate clocks rather than one `updatedAt`, because a card is edited
-  /// and reviewed independently: with a single clock, merging a device that
-  /// reviewed the card against one that fixed a typo has to discard one of
-  /// them wholesale, silently rolling back either the review or the edit.
-  ///
-  /// Nullable so records written before these fields existed still read back
-  /// — the generated adapter builds a sparse field map, so a missing index is
-  /// null rather than a crash. Sync treats null as [createdAt].
-  ///
-  /// Deliberately absent from [Flashcard]: these describe a stored replica,
-  /// not the flashcard itself, and putting them on the entity would drag them
-  /// into its `Equatable.props` and change `==` for every existing consumer.
+  /// Nullable so records written before these fields existed still load — the
+  /// generated adapter reads a sparse field map. Sync treats null as
+  /// [createdAt]. Kept off [Flashcard] itself, which would change its `==`.
   @HiveField(12)
   int? contentUpdatedAtMs;
 
@@ -63,19 +55,19 @@ class FlashcardModel extends HiveObject {
   int? scheduleUpdatedAtMs;
 
   Flashcard toEntity() => Flashcard(
-        id: id,
-        deckId: deckId,
-        front: front,
-        back: back,
-        createdAt: createdAt,
-        state: CardState.values[state],
-        dueDate: dueDate,
-        intervalDays: intervalDays,
-        easeFactor: easeFactor,
-        learningStepIndex: learningStepIndex,
-        lapses: lapses,
-        reviewCount: reviewCount,
-      );
+    id: id,
+    deckId: deckId,
+    front: front,
+    back: back,
+    createdAt: createdAt,
+    state: CardState.values[state],
+    dueDate: dueDate,
+    intervalDays: intervalDays,
+    easeFactor: easeFactor,
+    learningStepIndex: learningStepIndex,
+    lapses: lapses,
+    reviewCount: reviewCount,
+  );
 
   static FlashcardModel fromEntity(Flashcard entity) => FlashcardModel()
     ..id = entity.id

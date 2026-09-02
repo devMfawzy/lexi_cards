@@ -2,25 +2,19 @@ import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 
 part 'tombstone_model.g.dart';
 
-/// What a [TombstoneModel] refers to. Stored as a string rather than an enum
-/// index because the persisted value has to survive the enum being reordered.
+/// Stored as strings rather than enum indices, which reordering would break.
 class TombstoneEntity {
   static const deck = 'deck';
   static const card = 'card';
 }
 
-/// A record of something the user deleted.
+/// A record of something the user deleted. Without one, sync can't tell
+/// "deleted here" from "not created here yet", and the record returns from the
+/// other device.
 ///
-/// Deletion has to leave a trace, or sync can't tell "deleted here" apart from
-/// "not yet created here" — a record deleted on one device would simply come
-/// back from the other, which is the classic way local-first sync loses a
-/// user's intent.
-///
-/// Only decks and individual cards get tombstones. Deleting a deck records one
-/// tombstone for the deck itself, *not* one per card it contained: the cards'
-/// removal is derived at merge time from the deck's tombstone, so a card that
-/// was concurrently edited on another device can't survive its own deck and
-/// become an unreachable orphan.
+/// Deleting a deck records one tombstone for the deck, not one per card — card
+/// removal is derived from it at merge time, so a card edited concurrently
+/// elsewhere can't outlive its own deck.
 @HiveType(typeId: 3)
 class TombstoneModel extends HiveObject {
   /// The id of the deleted deck or card.
@@ -38,11 +32,10 @@ class TombstoneModel extends HiveObject {
     required String id,
     required String entityType,
     required int deletedAtMs,
-  }) =>
-      TombstoneModel()
-        ..id = id
-        ..entityType = entityType
-        ..deletedAtMs = deletedAtMs;
+  }) => TombstoneModel()
+    ..id = id
+    ..entityType = entityType
+    ..deletedAtMs = deletedAtMs;
 
   /// The Hive key to store this under: type *and* id, since a deck and a card
   /// could in principle carry the same uuid. Named to avoid colliding with

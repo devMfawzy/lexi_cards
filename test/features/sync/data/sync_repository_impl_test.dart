@@ -62,11 +62,8 @@ void main() {
   late FakeCloudStorage cloud;
   var clock = DateTime.utc(2026, 6, 1);
 
-  SyncRepositoryImpl buildRepository() => SyncRepositoryImpl(
-        localDataSource: localDataSource,
-        cloudStorage: cloud,
-        now: () => clock,
-      );
+  SyncRepositoryImpl buildRepository() =>
+      SyncRepositoryImpl(localDataSource: localDataSource, cloudStorage: cloud, now: () => clock);
 
   DeckModel deck(String id, {String name = 'Spanish'}) => DeckModel()
     ..id = id
@@ -129,7 +126,9 @@ void main() {
     await localDataSource.saveDeck(deck('deck-1'), kind: WriteKind.content);
     await buildRepository().sync();
 
-    publishFromAnotherDevice((s) => s.copyWith(cards: [
+    publishFromAnotherDevice(
+      (s) => s.copyWith(
+        cards: [
           ...s.cards,
           const CardRecord(
             id: 'from-other-device',
@@ -147,7 +146,9 @@ void main() {
             reviewCount: 0,
             scheduleUpdatedAtMs: 2000,
           ),
-        ]));
+        ],
+      ),
+    );
 
     final outcome = await buildRepository().sync();
 
@@ -177,12 +178,14 @@ void main() {
     await localDataSource.saveCard(card('card-1'), kind: WriteKind.content);
     await buildRepository().sync();
 
-    publishFromAnotherDevice((s) => s.copyWith(
-          cards: const [],
-          tombstones: const [
-            TombstoneRecord(id: 'card-1', entityType: 'card', deletedAtMs: 9999999999999),
-          ],
-        ));
+    publishFromAnotherDevice(
+      (s) => s.copyWith(
+        cards: const [],
+        tombstones: const [
+          TombstoneRecord(id: 'card-1', entityType: 'card', deletedAtMs: 9999999999999),
+        ],
+      ),
+    );
 
     final outcome = await buildRepository().sync();
 
@@ -198,12 +201,14 @@ void main() {
     await localDataSource.saveCard(card('card-1'), kind: WriteKind.content);
     await buildRepository().sync();
 
-    publishFromAnotherDevice((s) => s.copyWith(
-          cards: const [],
-          tombstones: const [
-            TombstoneRecord(id: 'card-1', entityType: 'card', deletedAtMs: 1780000000000),
-          ],
-        ));
+    publishFromAnotherDevice(
+      (s) => s.copyWith(
+        cards: const [],
+        tombstones: const [
+          TombstoneRecord(id: 'card-1', entityType: 'card', deletedAtMs: 1780000000000),
+        ],
+      ),
+    );
 
     clock = DateTime.utc(2027, 1, 1);
     await buildRepository().sync();
@@ -228,27 +233,29 @@ void main() {
       kind: WriteKind.schedule,
     );
 
-    publishFromAnotherDevice((s) => s.copyWith(
-          cards: [
-            for (final c in s.cards)
-              CardRecord(
-                id: c.id,
-                createdAtMs: c.createdAtMs,
-                deckId: c.deckId,
-                front: 'corrected spelling',
-                back: c.back,
-                contentUpdatedAtMs: DateTime.utc(2026, 9, 1).millisecondsSinceEpoch,
-                state: c.state,
-                dueDateMs: c.dueDateMs,
-                intervalDays: c.intervalDays,
-                easeFactor: c.easeFactor,
-                learningStepIndex: c.learningStepIndex,
-                lapses: c.lapses,
-                reviewCount: c.reviewCount,
-                scheduleUpdatedAtMs: c.scheduleUpdatedAtMs,
-              ),
-          ],
-        ));
+    publishFromAnotherDevice(
+      (s) => s.copyWith(
+        cards: [
+          for (final c in s.cards)
+            CardRecord(
+              id: c.id,
+              createdAtMs: c.createdAtMs,
+              deckId: c.deckId,
+              front: 'corrected spelling',
+              back: c.back,
+              contentUpdatedAtMs: DateTime.utc(2026, 9, 1).millisecondsSinceEpoch,
+              state: c.state,
+              dueDateMs: c.dueDateMs,
+              intervalDays: c.intervalDays,
+              easeFactor: c.easeFactor,
+              learningStepIndex: c.learningStepIndex,
+              lapses: c.lapses,
+              reviewCount: c.reviewCount,
+              scheduleUpdatedAtMs: c.scheduleUpdatedAtMs,
+            ),
+        ],
+      ),
+    );
 
     clock = DateTime.utc(2026, 10, 1);
     await buildRepository().sync();

@@ -31,15 +31,15 @@ class ReviewLogModel extends HiveObject {
   late double newEaseFactor;
 
   ReviewLog toEntity() => ReviewLog(
-        id: id,
-        cardId: cardId,
-        reviewedAt: reviewedAt,
-        rating: Rating.values[rating],
-        previousIntervalDays: previousIntervalDays,
-        newIntervalDays: newIntervalDays,
-        previousEaseFactor: previousEaseFactor,
-        newEaseFactor: newEaseFactor,
-      );
+    id: id,
+    cardId: cardId,
+    reviewedAt: reviewedAt,
+    rating: Rating.values[rating],
+    previousIntervalDays: previousIntervalDays,
+    newIntervalDays: newIntervalDays,
+    previousEaseFactor: previousEaseFactor,
+    newEaseFactor: newEaseFactor,
+  );
 
   static ReviewLogModel fromEntity(ReviewLog entity) => ReviewLogModel()
     ..id = entity.id

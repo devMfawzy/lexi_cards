@@ -3,21 +3,13 @@ import 'package:equatable/equatable.dart';
 import '../../../cards/domain/entities/flashcard.dart';
 import '../../../review/domain/entities/rating.dart';
 
-/// The shapes the merge algorithm works on.
-///
-/// Deliberately *not* the domain entities. Merge needs each record's
-/// modification clocks, and those describe a stored replica rather than a
-/// flashcard — putting them on [Flashcard] would pull them into its
-/// `Equatable.props`, changing `==` for every existing consumer (bloc emits on
-/// state inequality, so a re-review that changed nothing else would start
-/// counting as a state change) and forcing new values into every existing test
-/// fixture. Keeping them here means `cards/domain` doesn't change at all.
-///
-/// Every timestamp is epoch milliseconds, never a `DateTime`. Two reasons:
-/// these values go on the wire, where an ISO-8601 local time carries no offset
-/// and would be reparsed in the receiving device's zone; and `DateTime`
-/// equality also compares `isUtc`, so two objects for the same instant can
-/// compare unequal, which would quietly break record comparison.
+// The shapes the merge works on — deliberately not the domain entities, which
+// would gain sync clocks in their `Equatable.props` and change `==` for every
+// existing consumer.
+//
+// Timestamps are epoch milliseconds, never `DateTime`: these go on the wire,
+// where an ISO-8601 local time carries no offset, and `DateTime` equality also
+// compares `isUtc`, so two objects for the same instant can compare unequal.
 
 class DeckRecord extends Equatable {
   final String id;
@@ -33,11 +25,11 @@ class DeckRecord extends Equatable {
   });
 
   DeckRecord copyWith({int? createdAtMs, int? contentUpdatedAtMs}) => DeckRecord(
-        id: id,
-        name: name,
-        createdAtMs: createdAtMs ?? this.createdAtMs,
-        contentUpdatedAtMs: contentUpdatedAtMs ?? this.contentUpdatedAtMs,
-      );
+    id: id,
+    name: name,
+    createdAtMs: createdAtMs ?? this.createdAtMs,
+    contentUpdatedAtMs: contentUpdatedAtMs ?? this.contentUpdatedAtMs,
+  );
 
   @override
   List<Object?> get props => [id, name, createdAtMs, contentUpdatedAtMs];
@@ -80,55 +72,50 @@ class CardRecord extends Equatable {
     required this.scheduleUpdatedAtMs,
   });
 
-  /// Rebuilds this card taking its content from [content] and its scheduling
-  /// from [schedule]. Each lane moves as a whole: mixing fields *within* a lane
-  /// would invent states the scheduler never produces — a card marked `newCard`
-  /// carrying a review count of 40 would sit in the new-card queue forever —
-  /// and taking `front` from one side with `back` from the other would show the
-  /// old answer to the new question.
+  /// Each lane moves as a whole. Mixing fields within one invents states the
+  /// scheduler never produces — a `newCard` with 40 reviews would sit in the
+  /// new-card queue forever — or shows the old answer to the new question.
   static CardRecord fromLanes({
     required CardRecord content,
     required CardRecord schedule,
     required int createdAtMs,
-  }) =>
-      CardRecord(
-        id: content.id,
-        createdAtMs: createdAtMs,
-        deckId: content.deckId,
-        front: content.front,
-        back: content.back,
-        contentUpdatedAtMs: content.contentUpdatedAtMs,
-        state: schedule.state,
-        dueDateMs: schedule.dueDateMs,
-        intervalDays: schedule.intervalDays,
-        easeFactor: schedule.easeFactor,
-        learningStepIndex: schedule.learningStepIndex,
-        lapses: schedule.lapses,
-        reviewCount: schedule.reviewCount,
-        scheduleUpdatedAtMs: schedule.scheduleUpdatedAtMs,
-      );
+  }) => CardRecord(
+    id: content.id,
+    createdAtMs: createdAtMs,
+    deckId: content.deckId,
+    front: content.front,
+    back: content.back,
+    contentUpdatedAtMs: content.contentUpdatedAtMs,
+    state: schedule.state,
+    dueDateMs: schedule.dueDateMs,
+    intervalDays: schedule.intervalDays,
+    easeFactor: schedule.easeFactor,
+    learningStepIndex: schedule.learningStepIndex,
+    lapses: schedule.lapses,
+    reviewCount: schedule.reviewCount,
+    scheduleUpdatedAtMs: schedule.scheduleUpdatedAtMs,
+  );
 
   @override
   List<Object?> get props => [
-        id,
-        createdAtMs,
-        deckId,
-        front,
-        back,
-        contentUpdatedAtMs,
-        state,
-        dueDateMs,
-        intervalDays,
-        easeFactor,
-        learningStepIndex,
-        lapses,
-        reviewCount,
-        scheduleUpdatedAtMs,
-      ];
+    id,
+    createdAtMs,
+    deckId,
+    front,
+    back,
+    contentUpdatedAtMs,
+    state,
+    dueDateMs,
+    intervalDays,
+    easeFactor,
+    learningStepIndex,
+    lapses,
+    reviewCount,
+    scheduleUpdatedAtMs,
+  ];
 }
 
-/// A review that happened. Immutable and append-only by construction, which is
-/// why logs can be merged by plain union and can never conflict.
+/// Immutable and append-only, which is why logs merge by plain union.
 class LogRecord extends Equatable {
   final String id;
   final String cardId;
@@ -152,15 +139,15 @@ class LogRecord extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        cardId,
-        reviewedAtMs,
-        rating,
-        previousIntervalDays,
-        newIntervalDays,
-        previousEaseFactor,
-        newEaseFactor,
-      ];
+    id,
+    cardId,
+    reviewedAtMs,
+    rating,
+    previousIntervalDays,
+    newIntervalDays,
+    previousEaseFactor,
+    newEaseFactor,
+  ];
 }
 
 class TombstoneRecord extends Equatable {
@@ -168,11 +155,7 @@ class TombstoneRecord extends Equatable {
   final String entityType;
   final int deletedAtMs;
 
-  const TombstoneRecord({
-    required this.id,
-    required this.entityType,
-    required this.deletedAtMs,
-  });
+  const TombstoneRecord({required this.id, required this.entityType, required this.deletedAtMs});
 
   String get key => '$entityType:$id';
 

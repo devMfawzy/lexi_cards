@@ -33,10 +33,7 @@ class _DeckNameDialogState extends State<DeckNameDialog> {
         autofocus: true,
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(l10n.cancel),
-        ),
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l10n.cancel)),
         ElevatedButton(
           onPressed: () {
             final name = _nameController.text.trim();

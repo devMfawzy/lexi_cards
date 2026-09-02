@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -40,7 +42,7 @@ class _SettingsView extends StatelessWidget {
       initialTime: TimeOfDay(hour: hour, minute: minute),
     );
     if (picked != null) {
-      cubit.setTime(picked.hour, picked.minute);
+      unawaited(cubit.setTime(picked.hour, picked.minute));
     }
   }
 
@@ -55,18 +57,9 @@ class _SettingsView extends StatelessWidget {
             onChanged: (value) => Navigator.of(context).pop(value ?? 'system'),
             child: Column(
               children: [
-                RadioListTile<String?>(
-                  title: Text(l10n.languageSystemDefault),
-                  value: null,
-                ),
-                RadioListTile<String?>(
-                  title: Text(l10n.languageEnglish),
-                  value: 'en',
-                ),
-                RadioListTile<String?>(
-                  title: Text(l10n.languageArabic),
-                  value: 'ar',
-                ),
+                RadioListTile<String?>(title: Text(l10n.languageSystemDefault), value: null),
+                RadioListTile<String?>(title: Text(l10n.languageEnglish), value: 'en'),
+                RadioListTile<String?>(title: Text(l10n.languageArabic), value: 'ar'),
               ],
             ),
           ),
@@ -74,7 +67,7 @@ class _SettingsView extends StatelessWidget {
       ),
     );
     if (choice == null || !context.mounted) return;
-    context.read<LocaleCubit>().setLocale(choice == 'system' ? null : Locale(choice));
+    unawaited(context.read<LocaleCubit>().setLocale(choice == 'system' ? null : Locale(choice)));
   }
 
   String _languageLabel(AppLocalizations l10n, Locale? locale) {
@@ -111,9 +104,7 @@ class _SettingsView extends StatelessWidget {
         listener: (context, state) {
           final message = state.errorMessage ?? _feedbackMessage(l10n, state.feedback);
           if (message != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(message)),
-            );
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
           }
         },
         builder: (context, state) {
@@ -122,8 +113,7 @@ class _SettingsView extends StatelessWidget {
           }
           final cubit = context.read<SettingsCubit>();
           final settings = state.settings;
-          final timeLabel =
-              TimeOfDay(hour: settings.hour, minute: settings.minute).format(context);
+          final timeLabel = TimeOfDay(hour: settings.hour, minute: settings.minute).format(context);
 
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -161,8 +151,7 @@ class _SettingsView extends StatelessWidget {
                   // Reads the shared cubit rather than the repository so the
                   // linked account shows here without a second round trip.
                   trailing: Text(
-                    context.watch<SyncCubit>().state.accountEmail ??
-                        l10n.syncNotConnected,
+                    context.watch<SyncCubit>().state.accountEmail ?? l10n.syncNotConnected,
                   ),
                   onTap: () => context.push('/settings/sync'),
                 ),

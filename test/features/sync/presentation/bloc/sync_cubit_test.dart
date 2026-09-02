@@ -18,11 +18,8 @@ void main() {
 
   final fixedNow = DateTime.utc(2026, 9, 1, 12);
 
-  SyncCubit buildCubit() => SyncCubit(
-        cloudStorage: cloudStorage,
-        syncRepository: syncRepository,
-        now: () => fixedNow,
-      );
+  SyncCubit buildCubit() =>
+      SyncCubit(cloudStorage: cloudStorage, syncRepository: syncRepository, now: () => fixedNow);
 
   setUp(() {
     cloudStorage = MockCloudStorage();
@@ -34,8 +31,9 @@ void main() {
     blocTest<SyncCubit, SyncState>(
       'restores a previously linked account without prompting',
       build: () {
-        when(() => cloudStorage.restoreAccount())
-            .thenAnswer((_) async => const CloudAccount('me@example.com'));
+        when(
+          () => cloudStorage.restoreAccount(),
+        ).thenAnswer((_) async => const CloudAccount('me@example.com'));
         return buildCubit();
       },
       act: (cubit) => cubit.load(),
@@ -58,8 +56,9 @@ void main() {
     blocTest<SyncCubit, SyncState>(
       'stores the account and confirms',
       build: () {
-        when(() => cloudStorage.linkAccount())
-            .thenAnswer((_) async => const CloudAccount('me@example.com'));
+        when(
+          () => cloudStorage.linkAccount(),
+        ).thenAnswer((_) async => const CloudAccount('me@example.com'));
         return buildCubit();
       },
       act: (cubit) => cubit.link(),
@@ -90,8 +89,9 @@ void main() {
       'clears the account',
       build: () {
         when(() => cloudStorage.unlinkAccount()).thenAnswer((_) async {});
-        when(() => cloudStorage.restoreAccount())
-            .thenAnswer((_) async => const CloudAccount('me@example.com'));
+        when(
+          () => cloudStorage.restoreAccount(),
+        ).thenAnswer((_) async => const CloudAccount('me@example.com'));
         return buildCubit();
       },
       act: (cubit) async {
@@ -109,8 +109,9 @@ void main() {
     blocTest<SyncCubit, SyncState>(
       'reports what changed and records the time',
       build: () {
-        when(() => syncRepository.sync())
-            .thenAnswer((_) async => const SyncOutcome(cardsChanged: 3));
+        when(
+          () => syncRepository.sync(),
+        ).thenAnswer((_) async => const SyncOutcome(cardsChanged: 3));
         return buildCubit();
       },
       act: (cubit) => cubit.syncNow(),
@@ -137,8 +138,9 @@ void main() {
     blocTest<SyncCubit, SyncState>(
       'a revoked account is dropped so the UI offers to reconnect',
       build: () {
-        when(() => cloudStorage.restoreAccount())
-            .thenAnswer((_) async => const CloudAccount('me@example.com'));
+        when(
+          () => cloudStorage.restoreAccount(),
+        ).thenAnswer((_) async => const CloudAccount('me@example.com'));
         when(() => syncRepository.sync()).thenThrow(const NotLinkedException());
         return buildCubit();
       },
@@ -168,8 +170,7 @@ void main() {
     blocTest<SyncCubit, SyncState>(
       'data from a newer app version is reported as such, not as a crash',
       build: () {
-        when(() => syncRepository.sync())
-            .thenThrow(const UnsupportedSnapshotVersionException(99));
+        when(() => syncRepository.sync()).thenThrow(const UnsupportedSnapshotVersionException(99));
         return buildCubit();
       },
       act: (cubit) => cubit.syncNow(),

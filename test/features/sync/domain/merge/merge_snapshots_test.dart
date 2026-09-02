@@ -11,13 +11,12 @@ DeckRecord deck(
   String name = 'Spanish',
   int createdAtMs = 1000,
   int contentUpdatedAtMs = 1000,
-}) =>
-    DeckRecord(
-      id: id,
-      name: name,
-      createdAtMs: createdAtMs,
-      contentUpdatedAtMs: contentUpdatedAtMs,
-    );
+}) => DeckRecord(
+  id: id,
+  name: name,
+  createdAtMs: createdAtMs,
+  contentUpdatedAtMs: contentUpdatedAtMs,
+);
 
 CardRecord card(
   String id, {
@@ -34,34 +33,33 @@ CardRecord card(
   int reviewCount = 0,
   int contentUpdatedAtMs = 1000,
   int scheduleUpdatedAtMs = 1000,
-}) =>
-    CardRecord(
-      id: id,
-      createdAtMs: createdAtMs,
-      deckId: deckId,
-      front: front,
-      back: back,
-      contentUpdatedAtMs: contentUpdatedAtMs,
-      state: state,
-      dueDateMs: dueDateMs,
-      intervalDays: intervalDays,
-      easeFactor: easeFactor,
-      learningStepIndex: learningStepIndex,
-      lapses: lapses,
-      reviewCount: reviewCount,
-      scheduleUpdatedAtMs: scheduleUpdatedAtMs,
-    );
+}) => CardRecord(
+  id: id,
+  createdAtMs: createdAtMs,
+  deckId: deckId,
+  front: front,
+  back: back,
+  contentUpdatedAtMs: contentUpdatedAtMs,
+  state: state,
+  dueDateMs: dueDateMs,
+  intervalDays: intervalDays,
+  easeFactor: easeFactor,
+  learningStepIndex: learningStepIndex,
+  lapses: lapses,
+  reviewCount: reviewCount,
+  scheduleUpdatedAtMs: scheduleUpdatedAtMs,
+);
 
 LogRecord log(String id, {String cardId = 'card-1', int reviewedAtMs = 1000}) => LogRecord(
-      id: id,
-      cardId: cardId,
-      reviewedAtMs: reviewedAtMs,
-      rating: Rating.good,
-      previousIntervalDays: 1,
-      newIntervalDays: 3,
-      previousEaseFactor: 2.5,
-      newEaseFactor: 2.5,
-    );
+  id: id,
+  cardId: cardId,
+  reviewedAtMs: reviewedAtMs,
+  rating: Rating.good,
+  previousIntervalDays: 1,
+  newIntervalDays: 3,
+  previousEaseFactor: 2.5,
+  newEaseFactor: 2.5,
+);
 
 TombstoneRecord deckGone(String id, int at) =>
     TombstoneRecord(id: id, entityType: 'deck', deletedAtMs: at);
@@ -77,14 +75,13 @@ SyncSnapshot snapshot({
   List<LogRecord> logs = const [],
   List<TombstoneRecord> tombstones = const [],
   int exportedAtMs = 5000,
-}) =>
-    SyncSnapshot(
-      exportedAtMs: exportedAtMs,
-      decks: decks ?? [deck('deck-1')],
-      cards: cards,
-      logs: logs,
-      tombstones: tombstones,
-    );
+}) => SyncSnapshot(
+  exportedAtMs: exportedAtMs,
+  decks: decks ?? [deck('deck-1')],
+  cards: cards,
+  logs: logs,
+  tombstones: tombstones,
+);
 
 void main() {
   group('algebraic properties', () {
@@ -134,9 +131,8 @@ void main() {
       final b = snapshot(cards: [card('card-1', front: 'b', contentUpdatedAtMs: 2000)]);
       final c = snapshot(cards: [card('card-1', front: 'c', contentUpdatedAtMs: 3000)]);
 
-      SyncSnapshot mergeAll(List<SyncSnapshot> all) => all.reduce(
-            (x, y) => mergeSnapshots(local: x, remote: y).merged,
-          );
+      SyncSnapshot mergeAll(List<SyncSnapshot> all) =>
+          all.reduce((x, y) => mergeSnapshots(local: x, remote: y).merged);
 
       expect(mergeAll([a, b, c]), mergeAll([c, a, b]));
       expect(mergeAll([a, b, c]), mergeAll([b, c, a]));
@@ -185,21 +181,29 @@ void main() {
   group('cards — the two lanes', () {
     test('a content edit does not roll back a newer review', () {
       // The failure the whole two-clock design exists to prevent.
-      final reviewed = snapshot(cards: [
-        card('card-1',
+      final reviewed = snapshot(
+        cards: [
+          card(
+            'card-1',
             state: CardState.review,
             intervalDays: 15,
             reviewCount: 8,
-            scheduleUpdatedAtMs: 5000),
-      ]);
-      final edited = snapshot(cards: [
-        card('card-1',
+            scheduleUpdatedAtMs: 5000,
+          ),
+        ],
+      );
+      final edited = snapshot(
+        cards: [
+          card(
+            'card-1',
             front: 'typo fixed',
             contentUpdatedAtMs: 9000,
             intervalDays: 6,
             reviewCount: 7,
-            scheduleUpdatedAtMs: 1000),
-      ]);
+            scheduleUpdatedAtMs: 1000,
+          ),
+        ],
+      );
 
       final merged = mergeSnapshots(local: reviewed, remote: edited).merged;
 
@@ -210,13 +214,21 @@ void main() {
     });
 
     test('a review does not revert a newer content edit', () {
-      final edited = snapshot(cards: [
-        card('card-1', front: 'typo fixed', contentUpdatedAtMs: 9000, reviewCount: 1),
-      ]);
-      final reviewed = snapshot(cards: [
-        card('card-1', front: 'stale', contentUpdatedAtMs: 1000, reviewCount: 5,
-            intervalDays: 20, scheduleUpdatedAtMs: 9500),
-      ]);
+      final edited = snapshot(
+        cards: [card('card-1', front: 'typo fixed', contentUpdatedAtMs: 9000, reviewCount: 1)],
+      );
+      final reviewed = snapshot(
+        cards: [
+          card(
+            'card-1',
+            front: 'stale',
+            contentUpdatedAtMs: 1000,
+            reviewCount: 5,
+            intervalDays: 20,
+            scheduleUpdatedAtMs: 9500,
+          ),
+        ],
+      );
 
       final merged = mergeSnapshots(local: edited, remote: reviewed).merged;
 
@@ -226,8 +238,10 @@ void main() {
     });
 
     test('the whole scheduling lane moves together, never field by field', () {
-      final a = snapshot(cards: [
-        card('card-1',
+      final a = snapshot(
+        cards: [
+          card(
+            'card-1',
             state: CardState.review,
             dueDateMs: 8000,
             intervalDays: 30,
@@ -235,10 +249,14 @@ void main() {
             learningStepIndex: 0,
             lapses: 1,
             reviewCount: 12,
-            scheduleUpdatedAtMs: 7000),
-      ]);
-      final b = snapshot(cards: [
-        card('card-1',
+            scheduleUpdatedAtMs: 7000,
+          ),
+        ],
+      );
+      final b = snapshot(
+        cards: [
+          card(
+            'card-1',
             state: CardState.learning,
             dueDateMs: 2000,
             intervalDays: 1,
@@ -246,8 +264,10 @@ void main() {
             learningStepIndex: 1,
             lapses: 4,
             reviewCount: 3,
-            scheduleUpdatedAtMs: 9999),
-      ]);
+            scheduleUpdatedAtMs: 9999,
+          ),
+        ],
+      );
 
       final winner = mergeSnapshots(local: a, remote: b).merged.cards.single;
 
@@ -262,12 +282,12 @@ void main() {
     test('the side with more reviews wins scheduling even with an older clock', () {
       // reviewCount is a logical clock the scheduler already maintains, so a
       // device with a badly wrong wall clock cannot win a scheduling conflict.
-      final moreReviews = snapshot(cards: [
-        card('card-1', reviewCount: 9, intervalDays: 40, scheduleUpdatedAtMs: 100),
-      ]);
-      final wrongClock = snapshot(cards: [
-        card('card-1', reviewCount: 2, intervalDays: 3, scheduleUpdatedAtMs: 99999999),
-      ]);
+      final moreReviews = snapshot(
+        cards: [card('card-1', reviewCount: 9, intervalDays: 40, scheduleUpdatedAtMs: 100)],
+      );
+      final wrongClock = snapshot(
+        cards: [card('card-1', reviewCount: 2, intervalDays: 3, scheduleUpdatedAtMs: 99999999)],
+      );
 
       final merged = mergeSnapshots(local: moreReviews, remote: wrongClock).merged;
 
@@ -285,12 +305,12 @@ void main() {
     });
 
     test('front and back always come from the same side', () {
-      final a = snapshot(cards: [
-        card('card-1', front: 'Q old', back: 'A old', contentUpdatedAtMs: 1000),
-      ]);
-      final b = snapshot(cards: [
-        card('card-1', front: 'Q new', back: 'A new', contentUpdatedAtMs: 2000),
-      ]);
+      final a = snapshot(
+        cards: [card('card-1', front: 'Q old', back: 'A old', contentUpdatedAtMs: 1000)],
+      );
+      final b = snapshot(
+        cards: [card('card-1', front: 'Q new', back: 'A new', contentUpdatedAtMs: 2000)],
+      );
 
       final merged = mergeSnapshots(local: a, remote: b).merged;
 
@@ -311,7 +331,9 @@ void main() {
     });
 
     test('a card edited after it was deleted elsewhere is resurrected', () {
-      final edited = snapshot(cards: [card('card-1', front: 'still wanted', contentUpdatedAtMs: 9000)]);
+      final edited = snapshot(
+        cards: [card('card-1', front: 'still wanted', contentUpdatedAtMs: 9000)],
+      );
       final deleted = snapshot(cards: [], tombstones: [cardGone('card-1', 5000)]);
 
       final merged = mergeSnapshots(local: edited, remote: deleted).merged;
@@ -323,9 +345,11 @@ void main() {
       // Cards are rated from a queue loaded before the delete happened, so
       // letting a review resurrect them would make deletes impossible to make
       // stick while studying on another device.
-      final reviewed = snapshot(cards: [
-        card('card-1', contentUpdatedAtMs: 1000, reviewCount: 4, scheduleUpdatedAtMs: 9000),
-      ]);
+      final reviewed = snapshot(
+        cards: [
+          card('card-1', contentUpdatedAtMs: 1000, reviewCount: 4, scheduleUpdatedAtMs: 9000),
+        ],
+      );
       final deleted = snapshot(cards: [], tombstones: [cardGone('card-1', 5000)]);
 
       expect(mergeSnapshots(local: reviewed, remote: deleted).merged.cards, isEmpty);
@@ -339,10 +363,7 @@ void main() {
     });
 
     test('deleting a deck also removes its cards on the other device', () {
-      final hasCards = snapshot(
-        decks: [deck('deck-1')],
-        cards: [card('card-1'), card('card-2')],
-      );
+      final hasCards = snapshot(decks: [deck('deck-1')], cards: [card('card-1'), card('card-2')]);
       final deletedDeck = snapshot(decks: [], tombstones: [deckGone('deck-1', 5000)]);
 
       final result = mergeSnapshots(local: hasCards, remote: deletedDeck);
@@ -384,7 +405,10 @@ void main() {
     test('no surviving card references a deck that did not survive', () {
       final orphaning = snapshot(
         decks: [deck('deck-1')],
-        cards: [card('card-1'), card('stray', deckId: 'deck-missing')],
+        cards: [
+          card('card-1'),
+          card('stray', deckId: 'deck-missing'),
+        ],
       );
 
       final merged = mergeSnapshots(local: orphaning, remote: SyncSnapshot.empty).merged;
@@ -453,8 +477,11 @@ void main() {
     });
 
     test('a log whose card was deleted is retained', () {
-      final a = snapshot(cards: [], logs: [log('log-1', cardId: 'gone')],
-          tombstones: [cardGone('gone', 5000)]);
+      final a = snapshot(
+        cards: [],
+        logs: [log('log-1', cardId: 'gone')],
+        tombstones: [cardGone('gone', 5000)],
+      );
 
       expect(mergeSnapshots(local: a, remote: SyncSnapshot.empty).merged.logs, hasLength(1));
     });
@@ -475,10 +502,12 @@ void main() {
 
     test('only the records that actually differ are queued', () {
       final local = snapshot(cards: [card('card-1'), card('card-2')]);
-      final remote = snapshot(cards: [
-        card('card-1'),
-        card('card-2', front: 'changed', contentUpdatedAtMs: 9000),
-      ]);
+      final remote = snapshot(
+        cards: [
+          card('card-1'),
+          card('card-2', front: 'changed', contentUpdatedAtMs: 9000),
+        ],
+      );
 
       final result = mergeSnapshots(local: local, remote: remote);
 

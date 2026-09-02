@@ -12,10 +12,7 @@ class SyncPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: getIt<SyncCubit>()..load(),
-      child: const _SyncView(),
-    );
+    return BlocProvider.value(value: getIt<SyncCubit>()..load(), child: const _SyncView());
   }
 }
 
@@ -35,9 +32,9 @@ class _SyncView extends StatelessWidget {
         final total = outcome == null
             ? 0
             : outcome.decksChanged +
-                outcome.cardsChanged +
-                outcome.reviewsAdded +
-                outcome.recordsRemoved;
+                  outcome.cardsChanged +
+                  outcome.reviewsAdded +
+                  outcome.recordsRemoved;
         return l10n.syncChangesApplied(total);
       case SyncFeedback.notLinked:
         return l10n.syncNeedsAccount;
@@ -83,9 +80,7 @@ class _SyncView extends StatelessWidget {
         listener: (context, state) {
           final message = state.errorMessage ?? _feedbackMessage(l10n, state);
           if (message != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(message)),
-            );
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
           }
         },
         builder: (context, state) {
@@ -100,9 +95,9 @@ class _SyncView extends StatelessWidget {
                   padding: const EdgeInsets.all(16),
                   child: Text(
                     l10n.syncExplainer,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
                   ),
                 ),
               ),
@@ -130,9 +125,9 @@ class _SyncView extends StatelessWidget {
                                       Localizations.localeOf(context).toString(),
                                     ).add_jm().format(state.lastSyncedAt!),
                                   ),
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
                           ),
                         ),
                     ],

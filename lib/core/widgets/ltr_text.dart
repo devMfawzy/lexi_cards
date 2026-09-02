@@ -25,11 +25,7 @@ class LtrText extends StatelessWidget {
     final ambientIsRtl = Directionality.of(context) == TextDirection.rtl;
     return Directionality(
       textDirection: TextDirection.ltr,
-      child: Text(
-        text,
-        style: style,
-        textAlign: ambientIsRtl ? TextAlign.right : TextAlign.left,
-      ),
+      child: Text(text, style: style, textAlign: ambientIsRtl ? TextAlign.right : TextAlign.left),
     );
   }
 }

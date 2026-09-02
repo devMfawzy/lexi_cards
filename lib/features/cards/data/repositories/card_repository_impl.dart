@@ -12,10 +12,7 @@ class CardRepositoryImpl implements CardRepository {
   final LocalDataSource localDataSource;
   final Uuid _uuid;
 
-  CardRepositoryImpl({
-    required this.localDataSource,
-    Uuid? uuid,
-  }) : _uuid = uuid ?? const Uuid();
+  CardRepositoryImpl({required this.localDataSource, Uuid? uuid}) : _uuid = uuid ?? const Uuid();
 
   @override
   Future<List<Deck>> getDecks() async {
@@ -87,18 +84,12 @@ class CardRepositoryImpl implements CardRepository {
 
   @override
   Future<void> updateCard(Flashcard card) async {
-    await localDataSource.saveCard(
-      FlashcardModel.fromEntity(card),
-      kind: WriteKind.content,
-    );
+    await localDataSource.saveCard(FlashcardModel.fromEntity(card), kind: WriteKind.content);
   }
 
   @override
   Future<void> updateCardSchedule(Flashcard card) async {
-    await localDataSource.saveCard(
-      FlashcardModel.fromEntity(card),
-      kind: WriteKind.schedule,
-    );
+    await localDataSource.saveCard(FlashcardModel.fromEntity(card), kind: WriteKind.schedule);
   }
 
   @override
@@ -117,17 +108,19 @@ class CardRepositoryImpl implements CardRepository {
     final now = DateTime.now();
     final endOfToday = DateTime(now.year, now.month, now.day + 1);
 
-    final learningDue = cards
-        .where((c) =>
-            (c.state == CardState.learning || c.state == CardState.relearning) &&
-            !c.dueDate.isAfter(now))
-        .toList()
-      ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
+    final learningDue =
+        cards
+            .where(
+              (c) =>
+                  (c.state == CardState.learning || c.state == CardState.relearning) &&
+                  !c.dueDate.isAfter(now),
+            )
+            .toList()
+          ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
 
-    final reviewDue = cards
-        .where((c) => c.state == CardState.review && c.dueDate.isBefore(endOfToday))
-        .toList()
-      ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
+    final reviewDue =
+        cards.where((c) => c.state == CardState.review && c.dueDate.isBefore(endOfToday)).toList()
+          ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
 
     final newCards = cards.where((c) => c.state == CardState.newCard).toList()
       ..sort((a, b) => a.createdAt.compareTo(b.createdAt));

@@ -10,8 +10,7 @@ import 'package:lexi_cards/core/rich_text/quill_content.dart';
 void main() {
   group('documentFromStored', () {
     test('round-trips valid Delta JSON', () {
-      const raw =
-          '[{"insert":"Hello ","attributes":{"bold":true}},{"insert":"world\\n"}]';
+      const raw = '[{"insert":"Hello ","attributes":{"bold":true}},{"insert":"world\\n"}]';
       final document = documentFromStored(raw);
       expect(document.toPlainText(), 'Hello world\n');
     });
@@ -54,8 +53,7 @@ void main() {
 
   group('plainTextPreview', () {
     test('strips formatting and trailing newline from rich content', () {
-      const raw =
-          '[{"insert":"Hello ","attributes":{"bold":true}},{"insert":"world\\n"}]';
+      const raw = '[{"insert":"Hello ","attributes":{"bold":true}},{"insert":"world\\n"}]';
       expect(plainTextPreview(raw), 'Hello world');
     });
 
@@ -64,8 +62,7 @@ void main() {
     });
 
     test('collapses multi-line content onto one line instead of cutting at the first break', () {
-      const raw =
-          '[{"insert":"inadequaty\\nA\\nB\\nC\\n"}]';
+      const raw = '[{"insert":"inadequaty\\nA\\nB\\nC\\n"}]';
       expect(plainTextPreview(raw), 'inadequaty A B C');
     });
   });
@@ -92,18 +89,12 @@ void main() {
 
   group('cardPreviewLabel', () {
     test('behaves like plainTextPreview when there is text', () {
-      expect(
-        cardPreviewLabel('Hello world', imagePlaceholder: '📷 Image'),
-        'Hello world',
-      );
+      expect(cardPreviewLabel('Hello world', imagePlaceholder: '📷 Image'), 'Hello world');
     });
 
     test('falls back to the caller-supplied placeholder for an image-only card', () {
       const raw = '[{"insert":{"image":"data:image/png;base64,AAAA"}},{"insert":"\\n"}]';
-      expect(
-        cardPreviewLabel(raw, imagePlaceholder: '📷 Image'),
-        '📷 Image',
-      );
+      expect(cardPreviewLabel(raw, imagePlaceholder: '📷 Image'), '📷 Image');
     });
 
     test('is empty for a genuinely blank card', () {
@@ -222,10 +213,7 @@ void main() {
       ).writeAsBytes(Uint8List(2 * 1024 * 1024));
 
       try {
-        expect(
-          () => imageEmbedSourceFor(file.path),
-          throwsA(isA<ImageTooLargeException>()),
-        );
+        expect(() => imageEmbedSourceFor(file.path), throwsA(isA<ImageTooLargeException>()));
       } finally {
         await file.delete();
       }
@@ -324,5 +312,5 @@ img.Image _noise({required int width, required int height, bool withAlpha = fals
 
 int _tmpCounter = 0;
 Future<File> _writePng(img.Image image) => File(
-      '${Directory.systemTemp.path}/quill_content_test_${DateTime.now().microsecondsSinceEpoch}_${_tmpCounter++}.png',
-    ).writeAsBytes(img.encodePng(image));
+  '${Directory.systemTemp.path}/quill_content_test_${DateTime.now().microsecondsSinceEpoch}_${_tmpCounter++}.png',
+).writeAsBytes(img.encodePng(image));

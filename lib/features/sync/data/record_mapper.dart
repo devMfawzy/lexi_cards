@@ -6,19 +6,15 @@ import '../../cards/domain/entities/flashcard.dart';
 import '../../review/domain/entities/rating.dart';
 import '../domain/entities/sync_records.dart';
 
-/// Converts between what Hive stores and what the merge works on.
-///
-/// The one piece of real logic here is the fallback for a missing clock:
-/// records written before those fields existed read back as null, and the
-/// honest interpretation is "last changed when it was created".
+// Converts between what Hive stores and what the merge works on. A missing
+// clock (a record written before those fields existed) reads as `createdAt`.
 
 DeckRecord deckToRecord(DeckModel model) => DeckRecord(
-      id: model.id,
-      name: model.name,
-      createdAtMs: model.createdAt.millisecondsSinceEpoch,
-      contentUpdatedAtMs:
-          model.contentUpdatedAtMs ?? model.createdAt.millisecondsSinceEpoch,
-    );
+  id: model.id,
+  name: model.name,
+  createdAtMs: model.createdAt.millisecondsSinceEpoch,
+  contentUpdatedAtMs: model.contentUpdatedAtMs ?? model.createdAt.millisecondsSinceEpoch,
+);
 
 DeckModel deckFromRecord(DeckRecord record) => DeckModel()
   ..id = record.id
@@ -63,15 +59,15 @@ FlashcardModel cardFromRecord(CardRecord record) => FlashcardModel()
   ..scheduleUpdatedAtMs = record.scheduleUpdatedAtMs;
 
 LogRecord logToRecord(ReviewLogModel model) => LogRecord(
-      id: model.id,
-      cardId: model.cardId,
-      reviewedAtMs: model.reviewedAt.millisecondsSinceEpoch,
-      rating: Rating.values[model.rating],
-      previousIntervalDays: model.previousIntervalDays,
-      newIntervalDays: model.newIntervalDays,
-      previousEaseFactor: model.previousEaseFactor,
-      newEaseFactor: model.newEaseFactor,
-    );
+  id: model.id,
+  cardId: model.cardId,
+  reviewedAtMs: model.reviewedAt.millisecondsSinceEpoch,
+  rating: Rating.values[model.rating],
+  previousIntervalDays: model.previousIntervalDays,
+  newIntervalDays: model.newIntervalDays,
+  previousEaseFactor: model.previousEaseFactor,
+  newEaseFactor: model.newEaseFactor,
+);
 
 ReviewLogModel logFromRecord(LogRecord record) => ReviewLogModel()
   ..id = record.id
@@ -83,14 +79,11 @@ ReviewLogModel logFromRecord(LogRecord record) => ReviewLogModel()
   ..previousEaseFactor = record.previousEaseFactor
   ..newEaseFactor = record.newEaseFactor;
 
-TombstoneRecord tombstoneToRecord(TombstoneModel model) => TombstoneRecord(
-      id: model.id,
-      entityType: model.entityType,
-      deletedAtMs: model.deletedAtMs,
-    );
+TombstoneRecord tombstoneToRecord(TombstoneModel model) =>
+    TombstoneRecord(id: model.id, entityType: model.entityType, deletedAtMs: model.deletedAtMs);
 
 TombstoneModel tombstoneFromRecord(TombstoneRecord record) => TombstoneModel.of(
-      id: record.id,
-      entityType: record.entityType,
-      deletedAtMs: record.deletedAtMs,
-    );
+  id: record.id,
+  entityType: record.entityType,
+  deletedAtMs: record.deletedAtMs,
+);

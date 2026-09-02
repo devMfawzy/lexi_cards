@@ -99,9 +99,9 @@ class _CardFace extends StatelessWidget {
       child: SingleChildScrollView(
         child: DefaultTextStyle.merge(
           style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                fontWeight: FontWeight.w600,
-                color: isFront ? colorScheme.onSurface : colorScheme.onPrimaryContainer,
-              ),
+            fontWeight: FontWeight.w600,
+            color: isFront ? colorScheme.onSurface : colorScheme.onPrimaryContainer,
+          ),
           child: RichTextViewer(stored: text),
         ),
       ),

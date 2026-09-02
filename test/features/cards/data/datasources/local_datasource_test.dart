@@ -182,15 +182,17 @@ void main() {
       // history — their streak would change because they tidied up a deck.
       final dataSource = buildDataSource();
       await dataSource.saveCard(card('card-1'), kind: WriteKind.content);
-      await dataSource.saveReviewLog(ReviewLogModel()
-        ..id = 'log-1'
-        ..cardId = 'card-1'
-        ..reviewedAt = DateTime.utc(2025, 6, 1)
-        ..rating = 2
-        ..previousIntervalDays = 1
-        ..newIntervalDays = 3
-        ..previousEaseFactor = 2.5
-        ..newEaseFactor = 2.5);
+      await dataSource.saveReviewLog(
+        ReviewLogModel()
+          ..id = 'log-1'
+          ..cardId = 'card-1'
+          ..reviewedAt = DateTime.utc(2025, 6, 1)
+          ..rating = 2
+          ..previousIntervalDays = 1
+          ..newIntervalDays = 3
+          ..previousEaseFactor = 2.5
+          ..newEaseFactor = 2.5,
+      );
 
       await dataSource.deleteCard('card-1');
 

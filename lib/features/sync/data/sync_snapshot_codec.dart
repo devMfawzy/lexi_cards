@@ -85,98 +85,98 @@ class SyncSnapshotCodec {
   }
 
   static Map<String, dynamic> _toJson(SyncSnapshot s) => {
-        'schemaVersion': s.schemaVersion,
-        'exportedAtMs': s.exportedAtMs,
-        'decks': [
-          for (final d in s.decks)
-            {
-              'id': d.id,
-              'name': d.name,
-              'createdAtMs': d.createdAtMs,
-              'contentUpdatedAtMs': d.contentUpdatedAtMs,
-            },
-        ],
-        'cards': [
-          for (final c in s.cards)
-            {
-              'id': c.id,
-              'createdAtMs': c.createdAtMs,
-              'deckId': c.deckId,
-              'front': c.front,
-              'back': c.back,
-              'contentUpdatedAtMs': c.contentUpdatedAtMs,
-              'state': c.state.name,
-              'dueDateMs': c.dueDateMs,
-              'intervalDays': c.intervalDays,
-              'easeFactor': c.easeFactor,
-              'learningStepIndex': c.learningStepIndex,
-              'lapses': c.lapses,
-              'reviewCount': c.reviewCount,
-              'scheduleUpdatedAtMs': c.scheduleUpdatedAtMs,
-            },
-        ],
-        'logs': [
-          for (final l in s.logs)
-            {
-              'id': l.id,
-              'cardId': l.cardId,
-              'reviewedAtMs': l.reviewedAtMs,
-              'rating': l.rating.name,
-              'previousIntervalDays': l.previousIntervalDays,
-              'newIntervalDays': l.newIntervalDays,
-              'previousEaseFactor': l.previousEaseFactor,
-              'newEaseFactor': l.newEaseFactor,
-            },
-        ],
-        'tombstones': [
-          for (final t in s.tombstones)
-            {'id': t.id, 'entityType': t.entityType, 'deletedAtMs': t.deletedAtMs},
-        ],
-      };
+    'schemaVersion': s.schemaVersion,
+    'exportedAtMs': s.exportedAtMs,
+    'decks': [
+      for (final d in s.decks)
+        {
+          'id': d.id,
+          'name': d.name,
+          'createdAtMs': d.createdAtMs,
+          'contentUpdatedAtMs': d.contentUpdatedAtMs,
+        },
+    ],
+    'cards': [
+      for (final c in s.cards)
+        {
+          'id': c.id,
+          'createdAtMs': c.createdAtMs,
+          'deckId': c.deckId,
+          'front': c.front,
+          'back': c.back,
+          'contentUpdatedAtMs': c.contentUpdatedAtMs,
+          'state': c.state.name,
+          'dueDateMs': c.dueDateMs,
+          'intervalDays': c.intervalDays,
+          'easeFactor': c.easeFactor,
+          'learningStepIndex': c.learningStepIndex,
+          'lapses': c.lapses,
+          'reviewCount': c.reviewCount,
+          'scheduleUpdatedAtMs': c.scheduleUpdatedAtMs,
+        },
+    ],
+    'logs': [
+      for (final l in s.logs)
+        {
+          'id': l.id,
+          'cardId': l.cardId,
+          'reviewedAtMs': l.reviewedAtMs,
+          'rating': l.rating.name,
+          'previousIntervalDays': l.previousIntervalDays,
+          'newIntervalDays': l.newIntervalDays,
+          'previousEaseFactor': l.previousEaseFactor,
+          'newEaseFactor': l.newEaseFactor,
+        },
+    ],
+    'tombstones': [
+      for (final t in s.tombstones)
+        {'id': t.id, 'entityType': t.entityType, 'deletedAtMs': t.deletedAtMs},
+    ],
+  };
 
   static DeckRecord _deckFrom(Map<String, dynamic> j) => DeckRecord(
-        id: j['id'] as String,
-        name: j['name'] as String,
-        createdAtMs: j['createdAtMs'] as int,
-        contentUpdatedAtMs: j['contentUpdatedAtMs'] as int,
-      );
+    id: j['id'] as String,
+    name: j['name'] as String,
+    createdAtMs: j['createdAtMs'] as int,
+    contentUpdatedAtMs: j['contentUpdatedAtMs'] as int,
+  );
 
   static CardRecord _cardFrom(Map<String, dynamic> j) => CardRecord(
-        id: j['id'] as String,
-        createdAtMs: j['createdAtMs'] as int,
-        deckId: j['deckId'] as String,
-        front: j['front'] as String,
-        back: j['back'] as String,
-        contentUpdatedAtMs: j['contentUpdatedAtMs'] as int,
-        state: _enumByName(CardState.values, j['state'], CardState.newCard),
-        dueDateMs: j['dueDateMs'] as int,
-        intervalDays: j['intervalDays'] as int,
-        easeFactor: (j['easeFactor'] as num).toDouble(),
-        learningStepIndex: j['learningStepIndex'] as int,
-        lapses: j['lapses'] as int,
-        reviewCount: j['reviewCount'] as int,
-        scheduleUpdatedAtMs: j['scheduleUpdatedAtMs'] as int,
-      );
+    id: j['id'] as String,
+    createdAtMs: j['createdAtMs'] as int,
+    deckId: j['deckId'] as String,
+    front: j['front'] as String,
+    back: j['back'] as String,
+    contentUpdatedAtMs: j['contentUpdatedAtMs'] as int,
+    state: _enumByName(CardState.values, j['state'], CardState.newCard),
+    dueDateMs: j['dueDateMs'] as int,
+    intervalDays: j['intervalDays'] as int,
+    easeFactor: (j['easeFactor'] as num).toDouble(),
+    learningStepIndex: j['learningStepIndex'] as int,
+    lapses: j['lapses'] as int,
+    reviewCount: j['reviewCount'] as int,
+    scheduleUpdatedAtMs: j['scheduleUpdatedAtMs'] as int,
+  );
 
   static LogRecord _logFrom(Map<String, dynamic> j) => LogRecord(
-        id: j['id'] as String,
-        cardId: j['cardId'] as String,
-        reviewedAtMs: j['reviewedAtMs'] as int,
-        // A rating this build doesn't know can only come from a newer schema.
-        // Keeping the log with a neutral rating loses less than dropping the
-        // review outright, which would silently rewrite the user's history.
-        rating: _enumByName(Rating.values, j['rating'], Rating.good),
-        previousIntervalDays: j['previousIntervalDays'] as int,
-        newIntervalDays: j['newIntervalDays'] as int,
-        previousEaseFactor: (j['previousEaseFactor'] as num).toDouble(),
-        newEaseFactor: (j['newEaseFactor'] as num).toDouble(),
-      );
+    id: j['id'] as String,
+    cardId: j['cardId'] as String,
+    reviewedAtMs: j['reviewedAtMs'] as int,
+    // A rating this build doesn't know can only come from a newer schema.
+    // Keeping the log with a neutral rating loses less than dropping the
+    // review outright, which would silently rewrite the user's history.
+    rating: _enumByName(Rating.values, j['rating'], Rating.good),
+    previousIntervalDays: j['previousIntervalDays'] as int,
+    newIntervalDays: j['newIntervalDays'] as int,
+    previousEaseFactor: (j['previousEaseFactor'] as num).toDouble(),
+    newEaseFactor: (j['newEaseFactor'] as num).toDouble(),
+  );
 
   static TombstoneRecord _tombstoneFrom(Map<String, dynamic> j) => TombstoneRecord(
-        id: j['id'] as String,
-        entityType: j['entityType'] as String,
-        deletedAtMs: j['deletedAtMs'] as int,
-      );
+    id: j['id'] as String,
+    entityType: j['entityType'] as String,
+    deletedAtMs: j['deletedAtMs'] as int,
+  );
 
   static T _enumByName<T extends Enum>(List<T> values, Object? name, T fallback) =>
       values.firstWhere((v) => v.name == name, orElse: () => fallback);
@@ -251,11 +251,7 @@ SyncSnapshot clampSnapshot(SyncSnapshot snapshot, {required int nowMs}) {
     ],
     tombstones: [
       for (final t in snapshot.tombstones)
-        TombstoneRecord(
-          id: t.id,
-          entityType: t.entityType,
-          deletedAtMs: atMost(t.deletedAtMs),
-        ),
+        TombstoneRecord(id: t.id, entityType: t.entityType, deletedAtMs: atMost(t.deletedAtMs)),
     ],
   );
 }

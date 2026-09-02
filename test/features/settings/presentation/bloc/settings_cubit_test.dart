@@ -45,10 +45,12 @@ void main() {
       'requests permission and schedules the reminder when granted',
       build: () {
         when(() => notificationService.requestPermission()).thenAnswer((_) async => true);
-        when(() => notificationService.scheduleDailyReminder(
-              hour: any(named: 'hour'),
-              minute: any(named: 'minute'),
-            )).thenAnswer((_) async {});
+        when(
+          () => notificationService.scheduleDailyReminder(
+            hour: any(named: 'hour'),
+            minute: any(named: 'minute'),
+          ),
+        ).thenAnswer((_) async {});
         return buildCubit();
       },
       act: (cubit) async {
@@ -59,8 +61,9 @@ void main() {
         expect(cubit.state.settings.enabled, isTrue);
         expect(cubit.state.errorMessage, isNull);
         verify(() => notificationService.scheduleDailyReminder(hour: 9, minute: 0)).called(1);
-        verify(() => saveReminderSettings(const ReminderSettings(enabled: true, hour: 9, minute: 0)))
-            .called(1);
+        verify(
+          () => saveReminderSettings(const ReminderSettings(enabled: true, hour: 9, minute: 0)),
+        ).called(1);
       },
     );
 
@@ -77,10 +80,12 @@ void main() {
       verify: (cubit) {
         expect(cubit.state.settings.enabled, isFalse);
         expect(cubit.state.feedback, SettingsFeedback.reminderPermissionDenied);
-        verifyNever(() => notificationService.scheduleDailyReminder(
-              hour: any(named: 'hour'),
-              minute: any(named: 'minute'),
-            ));
+        verifyNever(
+          () => notificationService.scheduleDailyReminder(
+            hour: any(named: 'hour'),
+            minute: any(named: 'minute'),
+          ),
+        );
         verifyNever(() => saveReminderSettings(any()));
       },
     );
@@ -100,8 +105,9 @@ void main() {
       verify: (cubit) {
         expect(cubit.state.settings.enabled, isFalse);
         verify(() => notificationService.cancelDailyReminder()).called(1);
-        verify(() => saveReminderSettings(const ReminderSettings(enabled: false, hour: 8, minute: 0)))
-            .called(1);
+        verify(
+          () => saveReminderSettings(const ReminderSettings(enabled: false, hour: 8, minute: 0)),
+        ).called(1);
       },
     );
   });
@@ -110,10 +116,12 @@ void main() {
     blocTest<SettingsCubit, SettingsState>(
       'reschedules when the reminder is already enabled',
       build: () {
-        when(() => notificationService.scheduleDailyReminder(
-              hour: any(named: 'hour'),
-              minute: any(named: 'minute'),
-            )).thenAnswer((_) async {});
+        when(
+          () => notificationService.scheduleDailyReminder(
+            hour: any(named: 'hour'),
+            minute: any(named: 'minute'),
+          ),
+        ).thenAnswer((_) async {});
         return buildCubit(initial: const ReminderSettings(enabled: true, hour: 9, minute: 0));
       },
       act: (cubit) async {
@@ -137,10 +145,12 @@ void main() {
       verify: (cubit) {
         expect(cubit.state.settings.hour, 21);
         expect(cubit.state.settings.minute, 30);
-        verifyNever(() => notificationService.scheduleDailyReminder(
-              hour: any(named: 'hour'),
-              minute: any(named: 'minute'),
-            ));
+        verifyNever(
+          () => notificationService.scheduleDailyReminder(
+            hour: any(named: 'hour'),
+            minute: any(named: 'minute'),
+          ),
+        );
       },
     );
   });

@@ -5,22 +5,10 @@ class Deck extends Equatable {
   final String name;
   final DateTime createdAt;
 
-  const Deck({
-    required this.id,
-    required this.name,
-    required this.createdAt,
-  });
+  const Deck({required this.id, required this.name, required this.createdAt});
 
-  Deck copyWith({
-    String? id,
-    String? name,
-    DateTime? createdAt,
-  }) {
-    return Deck(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      createdAt: createdAt ?? this.createdAt,
-    );
+  Deck copyWith({String? id, String? name, DateTime? createdAt}) {
+    return Deck(id: id ?? this.id, name: name ?? this.name, createdAt: createdAt ?? this.createdAt);
   }
 
   @override
