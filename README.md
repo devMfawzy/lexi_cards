@@ -4,7 +4,7 @@
 
 A spaced-repetition flashcard app, Anki-style, built in Flutter. You create decks, add cards, and review them on a schedule driven by the SM-2 algorithm — the same family of algorithm Anki and SuperMemo use. Rate a card Again/Hard/Good/Easy and the app decides when you'll see it next.
 
-I built this as a portfolio piece to show a complete, non-trivial Flutter app: clean architecture, BLoC state management, local persistence, and a scheduling algorithm with actual logic worth unit testing — not just CRUD screens.
+Everything lives on the device. There is no account to create, no server to trust, and nothing to pay for — when you turn sync on, your cards go to your own Google Drive and nowhere else.
 
 <p>
   <img src="screenshots/decks.jpg" width="200" alt="My Decks screen">
@@ -19,8 +19,8 @@ I built this as a portfolio piece to show a complete, non-trivial Flutter app: c
 - **Decks & cards** — create, rename, and delete decks (long-press a deck for Rename/Browse/Delete), add/edit/delete cards. Front and back support rich text (bold, italic, underline, color) via a curated Quill toolbar, Anki-style, plus inline images (gallery, camera, or a pasted link) — resized/recompressed before being stored as base64 data URIs inline in the same field, no separate media store.
 - **Review sessions** — due cards are pulled per deck, or across every deck at once via "Study all decks" on the deck list (overdue learning/relearning cards first, then cards due today, then new cards, sorted globally either way), shown one at a time with a flip animation, and rated on a 4-button scale. A card that lands back in learning/relearning (short SM-2 steps, minutes away) stays in the same session — it's held in a pending list and spliced back into the queue once it's due, instead of only reappearing on the next reload.
 - **SM-2 scheduling** — new cards go through short learning steps (1m → 10m) before graduating into day-scale review intervals. Ease factor adjusts per rating, lapses send a card back to relearning. Config lives in one place (`sm2_config.dart`) so the constants aren't scattered through the scheduler.
-- **Stats screen** — every review was already being logged (`ReviewLog`: rating, interval before/after, ease before/after) but nothing surfaced it. Added a screen for current/longest streak, retention rate, and 7-day bar charts for reviews done vs. cards coming due.
-- **Daily reminders** — an opt-in local notification nudging you back to review, set from a new Settings screen (gear icon). Deliberately scoped to one recurring daily notification rather than per-card/per-due-date scheduling — iOS caps pending local notifications at 64, and rescheduling on every review is a lot of complexity for little gain over a daily nudge. Permission is requested in-context when you flip the toggle, not at cold start.
+- **Stats** — current and longest streak, retention rate, and 7-day bar charts for reviews done against cards coming due. Every review is logged in full (`ReviewLog`: rating, and interval and ease before and after), so the history is there to compute from rather than derived after the fact.
+- **Daily reminders** — an opt-in local notification nudging you back to review, set from Settings. Deliberately scoped to one recurring daily notification rather than per-card/per-due-date scheduling — iOS caps pending local notifications at 64, and rescheduling on every review is a lot of complexity for little gain over a daily nudge. Permission is requested in-context when you flip the toggle, not at cold start.
 - **Two-way sync** — link a Google account from Settings and your decks, cards, scheduling and review history stay in step across devices. Storage is the user's own Drive, in the hidden per-app folder, so there is no backend to run and this app can never see another file in their Drive. Not backup-and-restore: two devices that both changed things are genuinely merged, per record.
 - **Localization** — English and Arabic (RTL), switchable from Settings with a "System default" option that follows the device language. Built on Flutter's official `flutter gen-l10n`/ARB toolchain rather than a one-off string swap, so adding a third language later is just dropping in another ARB file. Weekday abbreviations use `intl`'s CLDR data (`DateFormat.E(locale)`) instead of a hand-maintained translation.
 
@@ -42,7 +42,7 @@ Card front/back are still plain `String` fields in Hive — rich text is Quill D
 
 The undecodable case is an Android one, not the iOS one it looks like: `image_picker` on iOS sniffs the leading byte and re-encodes anything it doesn't recognise — HEIC included — to JPEG before Dart sees it. Android hands the picked file back untouched unless a quality or size limit was requested, and Quill requests neither.
 
-Two real bugs worth calling out because they're the kind that only show up once you actually use the feature, not from reading the diff: `Document.toPlainText()` doesn't cover embeds, so an image-only card used to read as blank and get silently rejected by the save button (`isContentBlank` now also checks for embed ops directly). And every embed builder rebuild re-decoded the base64 payload into a fresh `MemoryImage` — since `MemoryImage` has no content-based equality, that meant a visible re-decode flicker on every keystroke while editing (`core/widgets/quill_image_provider_cache.dart` caches by source string to fix it).
+Two bugs here were only visible from using the feature rather than reading it: `Document.toPlainText()` doesn't cover embeds, so an image-only card used to read as blank and get silently rejected by the save button (`isContentBlank` now also checks for embed ops directly). And every embed builder rebuild re-decoded the base64 payload into a fresh `MemoryImage` — since `MemoryImage` has no content-based equality, that meant a visible re-decode flicker on every keystroke while editing (`core/widgets/quill_image_provider_cache.dart` caches by source string to fix it).
 
 `core/notifications/notification_service.dart` wraps `FlutterLocalNotificationsPlugin` behind an injectable interface (mockable in tests, no real platform channel needed) rather than a static/global plugin instance — same DI discipline as everything else here. It's the one piece of infrastructure that lives in `core/` instead of a feature, since it's a cross-cutting OS capability, not domain logic; the `settings` feature owns the *policy* (is it on, what time) and injects the service directly into its cubit rather than routing it through a repository, since scheduling a notification is a side effect, not a persistence concern.
 
@@ -106,7 +106,7 @@ dart run tool/generate_app_icon.dart && dart run flutter_launcher_icons
 flutter test
 ```
 
-The parts with actual logic worth testing, and all are covered:
+Unit tests cover the parts with real logic — the scheduler, the stats maths, the rich-text conversion, and the sync merge:
 
 - `sm2_scheduler_test.dart` — every state transition (new → learning → review, lapses into relearning, ease-factor floor, interval compounding) against a fixed `now`.
 - `get_review_stats_test.dart` — streak edge cases (gap breaks it, "reviewed yesterday but not yet today" still counts as active, same-day reviews don't double-count) and retention math.
@@ -122,7 +122,7 @@ The parts with actual logic worth testing, and all are covered:
 - `adapter_migration_test.dart` — reads a frame that is genuinely *missing* the fields added for sync, rather than one storing them as null. Writing with the current adapter and reading it straight back would pass even if those fields were non-nullable, and the failure that hides lands inside `Hive.openBox` — the deck list would throw on launch for everyone with existing data.
 - `local_datasource_test.dart` — that a content edit doesn't erase the record of when a card was last reviewed, that deleting a deck records one tombstone rather than one per card, and that deleting a card keeps its review logs.
 
-## What's not here yet
+## Known limits
 
 Sync uploads the whole snapshot every time rather than only what changed, which is fine for a text-heavy deck and wasteful for one full of photos. Each record already carries a content hash, so the upgrade — a small manifest plus content-addressed blobs, fetching only the images it doesn't have — is a schema-compatible addition that leaves the merge algorithm untouched. That separation is the reason to keep the transport dumb.
 
