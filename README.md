@@ -92,7 +92,7 @@ flutter pub get
 flutter run
 ```
 
-Runs on iOS and Android. Sync additionally needs OAuth clients registered in a Google Cloud project — a one-time setup written up in [`docs/google-cloud-setup.md`](docs/google-cloud-setup.md). Everything else works without it.
+Runs on iOS and Android; both are built in CI on every push. Sync additionally needs OAuth clients registered in a Google Cloud project — a one-time setup written up in [`docs/google-cloud-setup.md`](docs/google-cloud-setup.md). Everything else works without it.
 
 The app icon is generated rather than checked in as an opaque binary:
 

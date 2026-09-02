@@ -39,3 +39,27 @@ jobs:
       - run: flutter analyze --fatal-infos
 
       - run: flutter test
+
+  # Neither analyze nor the tests compile for a platform, so a Gradle or
+  # manifest problem passes both and still fails on a device. This job exists
+  # because exactly that happened: a plugin needed core library desugaring,
+  # and the app could not build for Android at all.
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.8
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - run: flutter build apk --debug
