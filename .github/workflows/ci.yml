@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  analyze-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.8
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      # Generated localizations are committed, so a mismatch between the ARB
+      # files and the generated Dart would otherwise only surface at runtime.
+      - name: Check generated localizations are current
+        run: |
+          flutter gen-l10n
+          git diff --exit-code lib/l10n || {
+            echo "::error::lib/l10n is stale — run 'flutter gen-l10n' and commit the result."
+            exit 1
+          }
+
+      # Generated files are excluded: their formatting belongs to whatever
+      # generated them, and dart format would fight the generator forever.
+      - name: Check formatting
+        run: |
+          dart format --output=none --set-exit-if-changed \
+            $(git ls-files '*.dart' | grep -vE '^lib/l10n/|\.g\.dart$')
+
+      - run: flutter analyze --fatal-infos
+
+      - run: flutter test

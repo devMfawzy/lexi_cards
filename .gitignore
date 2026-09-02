@@ -43,3 +43,10 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Editor / tooling artefacts
+.idea/
+*.iml
+.DS_Store
+devtools_options.yaml
+ui_test_recordings/
