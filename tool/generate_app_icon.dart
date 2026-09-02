@@ -27,10 +27,7 @@ void main() {
   // Android's adaptive icon crops the foreground to a shape of its choosing
   // and animates it, so the artwork has to sit well inside the safe zone and
   // the background is supplied separately as a flat colour.
-  _write(
-    'assets/icon/app_icon_foreground.png',
-    _draw(withBackground: false, inset: 0.62),
-  );
+  _write('assets/icon/app_icon_foreground.png', _draw(withBackground: false, inset: 0.62));
 }
 
 void _write(String path, img.Image icon) {
